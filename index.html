@@ -33,8 +33,56 @@
   --nav-h: 64px;
   color-scheme: dark;
 }
+/* Designs: per Einstellungen wählbar, gesetzt als data-skin auf <html> */
+:root[data-skin="hell"] {
+  --bg: #f2f5f6; --surface: #ffffff; --surface-2: #e8eef0; --line: #d3dde1; --fg: #13212b; --muted: #5a6a74;
+  --a: #1d7ca6; --b: #a8650f; --c: #1b8655; --warn: #8f6300; --bad: #b23c26; --ok: #1b8655;
+  color-scheme: light;
+}
+:root[data-skin="nordlicht"] {
+  --bg: #060a16; --surface: #0d1325; --surface-2: #141c33; --line: #222c49; --fg: #e7ecff; --muted: #8e98ba;
+  --a: #72c6ff; --b: #c39cff; --c: #5ef2a9; --warn: #f2d27a; --bad: #ff8f8f; --ok: #5ef2a9;
+  color-scheme: dark;
+}
+:root[data-skin="norwegen"] {
+  --bg: #061430; --surface: #0c1f45; --surface-2: #122a57; --line: #1e3a6c; --fg: #f3f6fb; --muted: #a2b2d0;
+  --a: #ff5c6c; --b: #f3f6fb; --c: #7db0ff; --warn: #ffd166; --bad: #ff7a85; --ok: #8be0b0;
+  color-scheme: dark;
+}
 * { box-sizing: border-box; }
 html, body { background: var(--bg); color: var(--fg); }
+:root[data-skin="nordlicht"] body { background:
+  radial-gradient(90% 40% at 15% 0%, color-mix(in srgb, var(--c) 16%, transparent), transparent 70%),
+  radial-gradient(70% 35% at 90% 5%, color-mix(in srgb, var(--b) 18%, transparent), transparent 70%),
+  var(--bg); background-attachment: fixed; }
+:root[data-skin="norwegen"] .hero::after { content: ""; position: absolute; top: 18px; right: -70px; width: 330px; height: 240px; pointer-events: none; opacity: .16;
+  background:
+    linear-gradient(90deg, transparent 31.8%, #002868 31.8%, #002868 40.9%, transparent 40.9%),
+    linear-gradient(180deg, transparent 43.75%, #002868 43.75%, #002868 56.25%, transparent 56.25%),
+    linear-gradient(90deg, transparent 27.3%, #fff 27.3%, #fff 45.5%, transparent 45.5%),
+    linear-gradient(180deg, transparent 37.5%, #fff 37.5%, #fff 62.5%, transparent 62.5%),
+    #ba0c2f;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%); mask-image: linear-gradient(90deg, transparent, #000 45%); }
+:root[data-skin="nordlicht"] .hero::before { inset: -30% -10% auto -10%; height: 110%; filter: blur(18px); background:
+  radial-gradient(40% 30% at 20% 30%, color-mix(in srgb, var(--c) 45%, transparent), transparent 70%),
+  radial-gradient(35% 28% at 55% 18%, color-mix(in srgb, var(--a) 35%, transparent), transparent 70%),
+  radial-gradient(40% 32% at 85% 35%, color-mix(in srgb, var(--b) 40%, transparent), transparent 70%); }
+:root[data-skin="hell"] .hero::before { opacity: .55; }
+
+/* Einstellungen */
+.gear { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+.gear svg { width: 20px; height: 20px; }
+.hero .topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.sheet-back { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .55); display: grid; align-items: end; justify-items: center; }
+.sheet { width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0; padding: 18px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 16px; }
+.sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
+.skins { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.skin { display: grid; gap: 8px; text-align: left; padding: 10px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface-2); color: var(--fg); }
+.skin[aria-pressed="true"] { border-color: var(--route); }
+.skin .pv { height: 62px; border-radius: 10px; position: relative; overflow: hidden; display: flex; align-items: end; gap: 5px; padding: 8px; }
+.skin .pv i { width: 18px; height: 18px; border-radius: 6px; }
+.skin b { font-size: .95rem; }
+.skin span { font-size: .78rem; color: var(--muted); }
 body { font-family: var(--font-body); font-size: 16px; line-height: 1.5; margin: 0; -webkit-font-smoothing: antialiased; }
 h1, h2, h3 { font-family: var(--font-display); line-height: 1.08; margin: 0; text-wrap: balance; }
 h1 { font-size: clamp(2rem, 8vw, 3rem); font-weight: 800; letter-spacing: -.02em; }
@@ -112,25 +160,40 @@ main.detail { padding-block: 16px calc(var(--nav-h) + env(safe-area-inset-bottom
 .tab svg { width: 22px; height: 22px; }
 .tab[aria-current="page"] { color: var(--route); }
 
+/* Kompakte Kennzahlen (Startkarten + Plan) */
+.kchips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.kchips span { display: grid; gap: 1px; padding: 7px 9px; border-radius: 10px; background: var(--surface-2); min-width: 0; }
+.kchips small { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-family: var(--font-mono); }
+.kchips b { font-size: .86rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.risk { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px; font-size: .84rem; color: var(--muted); }
+.risk svg { width: 16px; height: 16px; margin-top: 2px; color: var(--warn); }
+.summary { display: grid; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+
 /* Tagesplan */
-.daylist { display: grid; gap: 0; position: relative; }
-.day { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; position: relative; padding-bottom: 14px; }
-.day::before { content: ""; position: absolute; left: 25px; top: 44px; bottom: 0; width: 2px; background: var(--line); }
-.day:last-child::before { display: none; }
-.dnum { display: grid; place-items: center; align-content: center; width: 52px; height: 52px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-family: var(--font-mono); line-height: 1.05; text-align: center; }
-.dnum small { font-size: .62rem; color: var(--muted); letter-spacing: .05em; }
-.dnum b { font-size: 1.15rem; font-weight: 500; }
-.day.drive .dnum { border-color: color-mix(in srgb, var(--route) 55%, var(--line)); }
+.daylist { display: grid; gap: 8px; }
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.day > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 46px minmax(0, 1fr) 16px; gap: 12px; align-items: center; padding: 10px 12px; }
+.day > summary::-webkit-details-marker { display: none; }
+.dnum { display: grid; place-items: center; align-content: center; width: 46px; height: 46px; border-radius: 12px; background: var(--surface-2); font-family: var(--font-mono); line-height: 1.05; text-align: center; }
+.dnum small { font-size: .6rem; color: var(--muted); letter-spacing: .05em; }
+.dnum b { font-size: 1.05rem; font-weight: 500; }
 .day.drive .dnum b { color: var(--route); }
-.day.today .dnum { background: var(--route); color: var(--bg); }
+.day.today { border-color: var(--route); }
+.day.today .dnum { background: var(--route); }
 .day.today .dnum small, .day.today .dnum b { color: var(--bg); }
-.dcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; min-width: 0; }
-.dcard .meta { display: flex; flex-wrap: wrap; gap: 6px; }
-.pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 8px; font-size: .78rem; background: var(--surface-2); color: var(--fg); font-family: var(--font-mono); white-space: nowrap; }
+.dsum { display: grid; gap: 2px; min-width: 0; }
+.dtitle { font-family: var(--font-display); font-weight: 700; font-size: .98rem; line-height: 1.2; }
+.dsum .meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+.chev { width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-top: -4px; transition: transform .15s; }
+.day[open] .chev { transform: rotate(225deg); margin-top: 4px; }
+.dbody { display: grid; gap: 8px; padding: 0 14px 14px 70px; }
+@media (max-width: 380px) { .dbody { padding-left: 14px; } }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 8px; font-size: .76rem; background: var(--surface-2); color: var(--fg); font-family: var(--font-mono); white-space: nowrap; }
 .pill.rest { color: var(--ok); }
 .pill.drv { color: var(--route); }
-.dcard .line { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 6px; font-size: .92rem; }
-.dcard .line svg { width: 16px; height: 16px; margin-top: 3px; color: var(--muted); }
+.line { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 6px; font-size: .92rem; }
+.line svg { width: 16px; height: 16px; margin-top: 3px; color: var(--muted); }
+details.fold > summary .dsum { flex: 1; }
 .group-title { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; }
 .group-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 details.fold { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
@@ -598,6 +661,8 @@ const ICON = {
   wc: '<path d="M7 4v16M17 4v16M4 9h6M14 9h6"/>',
   fuel: '<path d="M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M3 21h14M15 9h2a2 2 0 012 2v6a1.5 1.5 0 003 0V8l-3-3"/>',
   stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
 };
 const svg = (n, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[n]}</svg>`;
 
@@ -626,6 +691,48 @@ function haversine(a, b) {
 }
 const fmtKm = km => km < 1 ? Math.round(km * 1000) + " m" : km < 20 ? km.toFixed(1).replace(".", ",") + " km" : Math.round(km) + " km";
 const plain = html => html.replace(/<a [^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g, "$2 [$1]").replace(/<[^>]+>/g, "");
+
+/* ---------- Designs ---------- */
+const SKINS = [
+  { id: "dunkel", n: "Dunkel", d: "Ruhig, fürs Handy am Abend", bg: "#0a1014", c: ["#62b6d8", "#e2a75e", "#86d9ab"] },
+  { id: "hell", n: "Hell", d: "Gut lesbar bei Tageslicht", bg: "#f2f5f6", c: ["#1d7ca6", "#a8650f", "#1b8655"] },
+  { id: "nordlicht", n: "Nordlicht", d: "Nachthimmel mit Polarlicht", bg: "linear-gradient(160deg,#0f2a2a,#060a16 55%,#20163a)", c: ["#72c6ff", "#c39cff", "#5ef2a9"] },
+  { id: "norwegen", n: "Norwegen", d: "Flaggenrot, Weiss und Blau", bg: "#061430", c: ["#ff5c6c", "#f3f6fb", "#7db0ff"] },
+];
+function applySkin(id) {
+  const sk = SKINS.find(x => x.id === id) || SKINS[0];
+  if (sk.id === "dunkel") document.documentElement.removeAttribute("data-skin");
+  else document.documentElement.setAttribute("data-skin", sk.id);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", sk.id === "hell" ? "#f2f5f6" : sk.id === "norwegen" ? "#061430" : sk.id === "nordlicht" ? "#060a16" : "#0a1014");
+}
+let settingsOpen = false;
+function settingsHTML() {
+  const cur = store.get("skin", "dunkel");
+  const pos = geo.pos || store.get("lastpos", null);
+  const geoState = !geoAvailable() ? "Dieser Browser liefert keinen Standort."
+    : geo.watch != null ? (geo.pos ? "Live – wird laufend aktualisiert, solange die App offen ist." : "Wird gesucht …")
+    : geo.err ? geo.err
+    : pos ? "Aus. Letzter bekannter Standort wird verwendet." : "Aus.";
+  return `<div class="sheet-back" data-settings="close-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Einstellungen">
+    <div class="grab"></div>
+    <div class="row" style="justify-content:space-between"><h2>Einstellungen</h2><button class="gear" data-settings="close" aria-label="Schliessen">${svg("close")}</button></div>
+    <div class="stack" style="gap:10px"><span class="label">Design</span>
+      <div class="skins">${SKINS.map(sk => `<button class="skin" data-pick-skin="${sk.id}" aria-pressed="${cur === sk.id}">
+        <div class="pv" style="background:${sk.bg}">${sk.c.map(c => `<i style="background:${c}"></i>`).join("")}</div>
+        <b>${sk.n}</b><span>${sk.d}</span></button>`).join("")}</div>
+    </div>
+    <div class="stack" style="gap:10px"><span class="label">Standort</span>
+      <p class="small">${esc(geoState)}</p>
+      <div class="row">${geo.watch != null ? `<button class="btn" data-geo="stop">${svg("stop")}Standort aus</button>` : `<button class="btn primary" data-geo="start">${svg("near")}Standort einschalten</button>`}</div>
+      <p class="small muted">Der Standort läuft nur, solange die App offen ist – nicht im Hintergrund. In der Claude-Vorschau ist er gesperrt; auf der eigenen Web-Adresse (GitHub Pages) funktioniert er.</p>
+    </div>
+  </div></div>`;
+}
+function renderSettings() {
+  const old = $(".sheet-back"); if (old) old.remove();
+  if (settingsOpen) document.body.insertAdjacentHTML("beforeend", settingsHTML());
+}
 
 /* =========================================================
    STATE + ROUTING (#a, #a-chat …)
@@ -680,9 +787,9 @@ function renderStart() {
   const chosen = store.get("chosen", null);
   return `
   <header class="hero"><div class="wrap">
-    <span class="label">Motorhome · solo · 23.10.–6.11.2026</span>
+    <div class="topline"><span class="label">Motorhome · solo · 23.10.–6.11.2026</span><button class="gear" data-settings="open" aria-label="Einstellungen">${svg("gear")}</button></div>
     <h1>Südnorwegen<br>Solotour</h1>
-    <p class="sub">Gleiche Anreise und Rückreise, drei Varianten für die neun Nächte dazwischen. Entschieden wird am Montag, 26.10., bei Ankunft in Oslo – nach der Wetterprognose.</p>
+    <p class="sub">Drei Varianten für die neun Nächte in Norwegen und Schweden. Entschieden wird am Mo 26.10. in Oslo, nach dem Wetter.</p>
     <div class="stats">
       <div class="stat"><b>${cd.big}</b><span>${cd.small}</span></div>
       <div class="stat"><b>9</b><span>Nächte NO / SE</span></div>
@@ -701,25 +808,24 @@ function renderStart() {
       <button class="rcard" style="--route:${r.color}" data-go="${r.key}" aria-label="Variante ${r.key}: ${esc(r.name)} öffnen">
         <div class="top">
           <span class="badge">${r.key}</span>
-          <div style="min-width:0"><h3>${esc(r.name)}${chosen === r.key ? ' <span class="chip" style="margin-left:6px;vertical-align:middle">gewählt</span>' : ""}</h3><div class="sub">${esc(r.title)}</div></div>
+          <div style="min-width:0"><h3>${esc(r.name)}${chosen === r.key ? ' <span class="chip" style="margin-left:6px;vertical-align:middle">zuletzt</span>' : ""}</h3><div class="sub">${esc(r.tagline)}</div></div>
           <span class="go" aria-hidden="true">→</span>
         </div>
         ${nightsBar(r)}
-        <div class="facts">
-          <div><span class="label">Schwerpunkt</span>${esc(r.tagline)}</div>
-          <div><span class="label">Fahr- / Ruhetage</span><span class="mono">${r.drive}</span></div>
-          <div><span class="label">Längste Etappe</span>${esc(r.longest)}</div>
-          <div><span class="label">Angeln</span>${esc(r.angeln)}</div>
-          <div style="grid-column:1/-1"><span class="label">Hauptrisiko</span>${esc(r.risk)}</div>
+        <div class="kchips">
+          <span><small>Fahr/Ruhe</small><b class="mono">${r.drive}</b></span>
+          <span><small>Längste</small><b>${esc(r.longest.split(" · ").slice(1).join(" · "))}</b></span>
+          <span><small>Angeln</small><b>${esc(r.angeln.split(",")[0])}</b></span>
         </div>
+        <div class="risk">${svg("info")}<span>${esc(r.risk)}</span></div>
       </button>`).join("")}
     </div>
 
-    <div class="section-title"><h2>Entscheidung am Mo 26.10.</h2><span class="label">Oslo, 10:00</span></div>
-    <p class="muted" style="margin-bottom:12px">Bei Ankunft der Fähre die Prognose für 27.–31.10. prüfen und in 15 Minuten entscheiden. Reservieren musst du in keiner Variante.</p>
+    <details class="fold" style="margin-top:22px"><summary>Welche Route? Entscheidung Mo 26.10. in Oslo</summary><div class="body">
+    <p class="muted small">Bei Ankunft der Fähre (10:00) die Prognose für 27.–31.10. prüfen und in 15 Minuten entscheiden. Reservieren musst du in keiner Variante.</p>
     <div class="decide">
       ${DECIDE.map(o => `<div class="opt" style="--route:${ROUTES[o.k].color}"><span class="chip">${o.k} · ${esc(ROUTES[o.k].name.split(" ")[0])}</span><span>${esc(o.w)}</span></div>`).join("")}
-    </div>
+    </div></div></details>
     <p class="foot">Planung Stand 14.10.2026 · Distanzen Google Maps, für das Motorhome rund 20 % plus Pausen aufgeschlagen. Daten dieser App (Checkliste, Chat) bleiben nur in diesem Browser.</p>
   </main>`;
 }
@@ -730,28 +836,39 @@ function renderStart() {
 function dayCard(d, r, label) {
   const isToday = d.iso === isoToday();
   const drive = !!d.km && !d.rest;
-  return `<div class="day ${drive ? "drive" : ""} ${isToday ? "today" : ""}">
-    <div class="dnum"><small>${esc(label[0])}</small><b>${esc(label[1])}</b></div>
-    <div class="dcard">
-      <div class="row" style="justify-content:space-between"><span class="label">${esc(d.date)}${isToday ? " · heute" : ""}</span>
-        <div class="meta">${d.rest ? '<span class="pill rest">Ruhetag</span>' : ""}${d.km ? `<span class="pill drv">${esc(d.km)}</span><span class="pill">${esc(d.h)}</span>` : ""}${d.start ? `<span class="pill">ab ${esc(d.start)}</span>` : ""}</div>
-      </div>
-      <h3>${esc(d.title)}</h3>
+  const chips = d.rest ? '<span class="pill rest">Ruhetag</span>' : d.km ? `<span class="pill drv">${esc(d.km)}</span><span class="pill">${esc(d.h)}</span>` : "";
+  return `<details class="day ${drive ? "drive" : ""} ${isToday ? "today" : ""}" ${isToday ? "open" : ""}>
+    <summary>
+      <span class="dnum"><small>${esc(label[0])}</small><b>${esc(label[1])}</b></span>
+      <span class="dsum"><span class="label">${esc(d.date)}${isToday ? " · heute" : ""}</span><span class="dtitle">${esc(d.title)}</span><span class="meta">${chips}</span></span>
+      <span class="chev" aria-hidden="true"></span>
+    </summary>
+    <div class="dbody">
       ${d.hike ? `<div class="line">${svg("boot")}<span>${esc(d.hike)}</span></div>` : ""}
       <div class="line">${svg("bed")}<span>${d.stay}</span></div>
+      ${d.start ? `<div class="line">${svg("car")}<span>Abfahrt ca. ${esc(d.start)}</span></div>` : ""}
       ${d.note ? `<div class="line">${svg("info")}<span class="muted">${esc(d.note)}</span></div>` : ""}
       ${d.map ? `<div><a class="btn" href="${d.map}" target="_blank" rel="noopener">${svg("map")}Route in Google Maps</a></div>` : ""}
     </div>
-  </div>`;
+  </details>`;
 }
 
 function tabPlan(r) {
   const openAn = isoToday() >= "2026-10-23" && isoToday() <= "2026-10-25";
   const openRueck = isoToday() >= "2026-11-04";
   return `
-  <p class="lead">${esc(r.intro)}</p>
-  <div class="maps" style="margin-top:12px">${r.maps.map(m => `<a class="btn primary" href="${m[1]}" target="_blank" rel="noopener">${svg("map")}${esc(m[0])}</a>`).join("")}</div>
-  <div style="margin-top:16px"><details class="fold" ${openAn ? "open" : ""}><summary>${svg("car", 'style="width:18px;height:18px;color:var(--route)"')} Anreise · Fr 23. – So 25.10.</summary>
+  <section class="summary">
+    ${nightsBar(r)}
+    <div class="kchips">
+      <span><small>Fahr/Ruhe</small><b class="mono">${r.drive}</b></span>
+      <span><small>Längste</small><b>${esc(r.longest.split(" · ").slice(1).join(" · "))}</b></span>
+      <span><small>Angeln</small><b>${esc(r.angeln.split(",")[0])}</b></span>
+    </div>
+    <p class="small muted">${esc(r.intro)}</p>
+    <div class="maps">${r.maps.map(m => `<a class="btn primary" href="${m[1]}" target="_blank" rel="noopener">${svg("map")}${esc(m[0])}</a>`).join("")}</div>
+  </section>
+  <p class="small muted" style="margin:14px 0 10px">Tippe auf einen Tag für Details.</p>
+  <div><details class="fold" ${openAn ? "open" : ""}><summary>${svg("car", 'style="width:18px;height:18px;color:var(--route)"')} Anreise · Fr 23. – So 25.10.</summary>
     <div class="body"><div class="daylist">${ANREISE.map(d => dayCard(d, r, [d.date.slice(0, 2), d.date.slice(3, 5)])).join("")}</div>
     <div class="note">Puffer Sonntag: rund 1,5 h bis zum Check-in. Wenn der Samstag stockt, früher anhalten und sonntags um 06:30 starten. Freiburg: SC-Heimspiel am So 25.10. – vorher anrufen, Fallback Wohnmobilpark Kenzingen an der A5.</div></div>
   </details></div>
@@ -766,14 +883,14 @@ function tabPlan(r) {
 }
 
 function tabOrte(r) {
-  return `<div class="stack">${r.places.map(p => `
-    <section class="place"><header><span class="label">${esc(p.d)}</span><h2>${esc(p.t)}</h2></header>
-      <ul class="facts-list">${p.items.map(([k, v]) => `<li><b>${esc(k)}</b><span>${v}</span></li>`).join("")}</ul>
-    </section>`).join("")}</div>`;
+  return `<div class="stack" style="gap:10px">${r.places.map((p, i) => `
+    <details class="fold place-f" ${i === 0 ? "open" : ""}><summary><span class="dsum"><span class="label">${esc(p.d)}</span><span class="dtitle">${esc(p.t)}</span></span></summary>
+      <div class="body"><ul class="facts-list">${p.items.map(([k, v]) => `<li><b>${esc(k)}</b><span>${v}</span></li>`).join("")}</ul></div>
+    </details>`).join("")}</div>`;
 }
 
 function tabTouren(r) {
-  return `<p class="lead">Zeiten sind Komoot-Sommerwerte; bei Schnee, Nässe und kurzen Tagen 30–50 % mehr einplanen. Alle Komoot-Touren sind in deinem Konto unter «Geplant» gespeichert – vor der Reise offline verfügbar machen.</p>
+  return `<div class="note small">Komoot-Zeiten sind Sommerwerte: bei Schnee und kurzen Tagen 30–50 % mehr einplanen. Touren vor der Reise offline speichern.</div>
   <div class="stack" style="margin-top:14px">${r.hikes.map(h => `
     <article class="hike">
       <div class="hd"><div><span class="label">${esc(h.day)}</span><h3>${esc(h.n)}</h3></div><span class="pill lvl-${h.lvl}">${esc(h.lvl)}</span></div>
@@ -830,9 +947,10 @@ function startGeo() {
       geo.pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
       store.set("lastpos", geo.pos);
       if (state.tab === "naehe") rerenderTab();
+      if (settingsOpen) renderSettings();
     }, e => {
       geo.err = e.code === 1 ? "Standortfreigabe abgelehnt oder hier gesperrt. In den Browser-Einstellungen für diese Seite erlauben." : "Standort gerade nicht verfügbar (kein GPS-Signal?).";
-      stopGeo(false); rerenderTab();
+      stopGeo(false); rerenderTab(); if (settingsOpen) renderSettings();
     }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 30000 });
     store.set("geoOn", true);
   } catch { geo.err = "Standort ist in dieser Ansicht gesperrt."; }
@@ -1150,6 +1268,7 @@ function renderDetail() {
     <button class="back" data-go="" aria-label="Zur Routenwahl">${svg("back")}</button>
     <span class="badge">${r.key}</span>
     <div class="t"><b>${esc(r.name)}</b><span>${esc(r.title)}</span></div>
+    <button class="gear" data-settings="open" aria-label="Einstellungen" style="margin-left:auto">${svg("gear")}</button>
   </div></div>
   <main class="detail wrap" id="tabbody">${tabBody(r)}</main>
   ${showComposer ? composerHTML() : ""}
@@ -1183,17 +1302,22 @@ function render() {
 
 /* ---------- Events ---------- */
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-go],[data-tab],[data-suggest],[data-chat],[data-geo],[data-filter]");
+  if (e.target.classList && e.target.classList.contains("sheet-back")) { settingsOpen = false; renderSettings(); return; }
+  const t = e.target.closest("[data-go],[data-tab],[data-suggest],[data-chat],[data-geo],[data-filter],[data-settings],[data-pick-skin]");
   if (!t) return;
+  if (t.dataset.settings === "open") { settingsOpen = true; renderSettings(); return; }
+  if (t.dataset.settings === "close") { settingsOpen = false; renderSettings(); return; }
+  if (t.dataset.pickSkin) { store.set("skin", t.dataset.pickSkin); applySkin(t.dataset.pickSkin); renderSettings(); return; }
   if (t.hasAttribute("data-go")) { go(t.dataset.go || null); return; }
   if (t.dataset.tab) { go(state.route, t.dataset.tab); return; }
   if (t.dataset.suggest) { sendChat(t.dataset.suggest); return; }
   if (t.dataset.chat === "clear") { if (chat.ctl) chat.ctl.abort(); store.set(chatKey(ROUTES[state.route]), []); rerenderTab(); return; }
   if (t.dataset.chat === "forget") { store.set("apikey", ""); rerenderTab(); return; }
-  if (t.dataset.geo === "start") { startGeo(); return; }
-  if (t.dataset.geo === "stop") { stopGeo(); rerenderTab(); return; }
+  if (t.dataset.geo === "start") { startGeo(); renderSettings(); return; }
+  if (t.dataset.geo === "stop") { stopGeo(); rerenderTab(); renderSettings(); return; }
   if (t.dataset.filter) { geo.filter = t.dataset.filter; rerenderTab(); return; }
 });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && settingsOpen) { settingsOpen = false; renderSettings(); } });
 document.addEventListener("change", e => {
   const t = e.target;
   if (t.dataset && t.dataset.todo) {
@@ -1224,6 +1348,7 @@ document.addEventListener("keydown", e => {
   }
 });
 
+applySkin(store.get("skin", "dunkel"));
 readHash();
 render();
 if (store.get("geoOn", false) && geoAvailable()) startGeo();
