@@ -1,0 +1,1232 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1014">
+<!-- BODY-START -->
+<title>Südnorwegen Solotour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: mobile-first Reise-App. Startseite = Routenwahl (3 Karten mit Nacht-Leiste), Detailseite = Kopf + Inhalt + feste Tab-Leiste unten. Max. 760px Spalte. Bewusst nur dunkel (Wunsch des Nutzers). */
+:root {
+  --bg: #0a1014;
+  --surface: #111a20;
+  --surface-2: #172229;
+  --line: #22313a;
+  --fg: #e3ebee;
+  --muted: #8597a1;
+  --a: #62b6d8;      /* Variante A: Fjordblau */
+  --b: #e2a75e;      /* Variante B: Fjell-Bernstein */
+  --c: #86d9ab;      /* Variante C: Nordlichtgrün */
+  --warn: #e9c46a;
+  --bad: #ef8a76;
+  --ok: #86d9ab;
+  --route: var(--a);
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 14px;
+  --nav-h: 64px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); }
+body { font-family: var(--font-body); font-size: 16px; line-height: 1.5; margin: 0; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.08; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 8vw, 3rem); font-weight: 800; letter-spacing: -.02em; }
+h2 { font-size: 1.45rem; font-weight: 700; letter-spacing: -.01em; }
+h3 { font-size: 1.08rem; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--route); text-underline-offset: 2px; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--route); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.label { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.stack { display: grid; gap: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- Startseite ---------- */
+.hero { position: relative; overflow: hidden; padding-block: 28px 22px; }
+.hero::before { content: ""; position: absolute; inset: -40% -20% auto -20%; height: 120%; background:
+  radial-gradient(60% 50% at 25% 40%, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%),
+  radial-gradient(50% 45% at 80% 30%, color-mix(in srgb, var(--a) 18%, transparent), transparent 70%);
+  filter: blur(10px); pointer-events: none; }
+.hero > * { position: relative; }
+.hero .label { color: var(--c); }
+.hero h1 { margin-top: 6px; }
+.hero .sub { margin-top: 10px; color: var(--muted); max-width: 52ch; }
+.ridge { display: block; width: 100%; height: 46px; margin-top: 18px; }
+.ridge path { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.ridge path.hi { stroke: color-mix(in srgb, var(--c) 55%, var(--line)); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.stat b { display: block; font-family: var(--font-mono); font-size: 1.35rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat span { font-size: .78rem; color: var(--muted); }
+
+.section-title { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 26px; margin-bottom: 12px; }
+.routes { display: grid; gap: 14px; }
+.rcard { --route: var(--a); display: grid; gap: 12px; text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; position: relative; transition: border-color .15s, transform .15s; }
+.rcard:hover { border-color: color-mix(in srgb, var(--route) 60%, var(--line)); }
+.rcard:active { transform: scale(.99); }
+.rcard .top { display: flex; align-items: center; gap: 12px; }
+.badge { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--bg); background: var(--route); }
+.rcard h3 { font-size: 1.25rem; }
+.rcard .sub { color: var(--muted); font-size: .9rem; }
+.rcard .go { margin-left: auto; color: var(--route); font-size: 1.4rem; line-height: 1; }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; font-size: .9rem; }
+.facts div { min-width: 0; }
+.facts .label { display: block; margin-bottom: 1px; }
+.nights { display: flex; gap: 3px; }
+.nights i { flex: 1; height: 8px; border-radius: 3px; background: color-mix(in srgb, var(--route) calc(var(--o) * 1%), var(--surface-2)); }
+.nights-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: .78rem; color: var(--muted); }
+.nights-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; background: color-mix(in srgb, var(--route) calc(var(--o) * 1%), var(--surface-2)); }
+
+.decide { display: grid; gap: 8px; }
+.decide .opt { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600; background: color-mix(in srgb, var(--route) 16%, transparent); color: var(--route); border: 1px solid color-mix(in srgb, var(--route) 35%, transparent); white-space: nowrap; }
+.foot { padding-block: 26px 40px; color: var(--muted); font-size: .82rem; }
+
+/* ---------- Detailseite ---------- */
+.dhead { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.dhead .wrap { display: flex; align-items: center; gap: 12px; padding-block: 10px; }
+.back { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.back svg { width: 20px; height: 20px; }
+.dhead .badge { width: 34px; height: 34px; font-size: 1.1rem; border-radius: 10px; }
+.dhead .t { min-width: 0; }
+.dhead .t b { display: block; font-family: var(--font-display); font-size: 1.1rem; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dhead .t span { font-size: .78rem; color: var(--muted); }
+main.detail { padding-block: 16px calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 28px); }
+.lead { color: var(--muted); max-width: 60ch; }
+
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.tabbar .in { max-width: 760px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.tab { display: grid; justify-items: center; gap: 2px; padding: 9px 2px 8px; height: var(--nav-h); background: none; border: 0; color: var(--muted); font-size: .7rem; font-weight: 600; }
+.tab svg { width: 22px; height: 22px; }
+.tab[aria-current="page"] { color: var(--route); }
+
+/* Tagesplan */
+.daylist { display: grid; gap: 0; position: relative; }
+.day { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; position: relative; padding-bottom: 14px; }
+.day::before { content: ""; position: absolute; left: 25px; top: 44px; bottom: 0; width: 2px; background: var(--line); }
+.day:last-child::before { display: none; }
+.dnum { display: grid; place-items: center; align-content: center; width: 52px; height: 52px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); font-family: var(--font-mono); line-height: 1.05; text-align: center; }
+.dnum small { font-size: .62rem; color: var(--muted); letter-spacing: .05em; }
+.dnum b { font-size: 1.15rem; font-weight: 500; }
+.day.drive .dnum { border-color: color-mix(in srgb, var(--route) 55%, var(--line)); }
+.day.drive .dnum b { color: var(--route); }
+.day.today .dnum { background: var(--route); color: var(--bg); }
+.day.today .dnum small, .day.today .dnum b { color: var(--bg); }
+.dcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; min-width: 0; }
+.dcard .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 8px; font-size: .78rem; background: var(--surface-2); color: var(--fg); font-family: var(--font-mono); white-space: nowrap; }
+.pill.rest { color: var(--ok); }
+.pill.drv { color: var(--route); }
+.dcard .line { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 6px; font-size: .92rem; }
+.dcard .line svg { width: 16px; height: 16px; margin-top: 3px; color: var(--muted); }
+.group-title { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; }
+.group-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+details.fold { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.fold > summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::after { content: "+"; margin-left: auto; font-family: var(--font-mono); color: var(--muted); font-size: 1.1rem; }
+details.fold[open] > summary::after { content: "–"; }
+details.fold > .body { padding: 0 16px 16px; display: grid; gap: 12px; }
+.maps { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); text-decoration: none; font-size: .88rem; font-weight: 600; }
+.btn svg { width: 16px; height: 16px; color: var(--route); flex: none; }
+.btn.primary { background: var(--route); color: var(--bg); border-color: transparent; }
+.btn.primary svg { color: var(--bg); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+/* Orte / Infos */
+.place { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.place header { display: grid; gap: 2px; }
+ul.facts-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+ul.facts-list li { display: grid; gap: 2px; font-size: .94rem; }
+ul.facts-list li b { font-size: .8rem; font-family: var(--font-mono); font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--route); }
+.note { border-left: 3px solid var(--warn); background: color-mix(in srgb, var(--warn) 9%, var(--surface)); padding: 10px 12px; border-radius: 0 10px 10px 0; font-size: .92rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-weight: 500; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Touren */
+.hike { display: grid; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+.hike .hd { display: flex; gap: 10px; align-items: start; justify-content: space-between; }
+.hike .nums { display: flex; flex-wrap: wrap; gap: 6px; }
+.lvl-leicht { color: var(--ok); } .lvl-mittel { color: var(--warn); } .lvl-schwer { color: var(--bad); }
+
+/* Checkliste */
+.check { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: .94rem; }
+.check:last-child { border-bottom: 0; }
+.check input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--route); }
+.check input:checked + span { color: var(--muted); text-decoration: line-through; }
+.progress { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--route); }
+
+/* Nähe */
+.here { display: grid; gap: 12px; background: var(--surface); border: 1px solid color-mix(in srgb, var(--route) 45%, var(--line)); border-radius: var(--r); padding: 16px; }
+.poi { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.poi:last-child { border-bottom: 0; }
+.poi .ic { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px; background: var(--surface-2); color: var(--route); }
+.poi .ic svg { width: 20px; height: 20px; }
+.poi .nm { font-weight: 600; font-size: .95rem; }
+.poi .ds { font-size: .8rem; color: var(--muted); }
+.poi .km { font-family: var(--font-mono); font-size: .9rem; text-align: right; white-space: nowrap; }
+.poi .km a { display: block; font-family: var(--font-body); font-size: .78rem; margin-top: 2px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: .84rem; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: color-mix(in srgb, var(--route) 18%, var(--surface)); color: var(--route); border-color: color-mix(in srgb, var(--route) 45%, var(--line)); }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--muted); }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.live.on i { background: var(--ok); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+
+/* Chat */
+.chat { display: grid; gap: 12px; }
+.msgs { display: grid; gap: 10px; }
+.msg { max-width: 88%; padding: 10px 13px; border-radius: 16px; font-size: .95rem; overflow-wrap: anywhere; }
+.msg.user { justify-self: end; background: var(--route); color: var(--bg); border-bottom-right-radius: 5px; }
+.msg.bot { justify-self: start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 5px; }
+.msg.bot p + p, .msg.bot ul + p, .msg.bot p + ul { margin-top: 8px; }
+.msg.bot ul { margin: 0; padding-left: 20px; }
+.msg.bot li + li { margin-top: 3px; }
+.msg.err { justify-self: stretch; max-width: none; background: color-mix(in srgb, var(--bad) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--line)); font-size: .88rem; }
+.typing { color: var(--muted); font-style: italic; }
+.suggest { display: flex; flex-wrap: wrap; gap: 6px; }
+.suggest button { text-align: left; padding: 7px 11px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: .84rem; color: var(--fg); }
+.composer { position: fixed; left: 0; right: 0; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px)); z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+.composer form { display: flex; gap: 8px; align-items: end; padding-block: 10px; }
+.composer textarea { flex: 1; min-width: 0; resize: none; max-height: 140px; padding: 11px 13px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); font-size: 16px; line-height: 1.35; }
+.composer button { flex: none; width: 46px; height: 46px; border-radius: 14px; border: 0; background: var(--route); color: var(--bg); display: grid; place-items: center; }
+.composer button svg { width: 20px; height: 20px; }
+body.chat-open main.detail { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 96px); }
+.keybox { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; font-size: .9rem; }
+.keybox input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); font-family: var(--font-mono); font-size: 14px; }
+.small { font-size: .82rem; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =========================================================
+   DATEN – aus «Motorhome-Solotour Südnorwegen» (Stand 14.10.2026)
+   ========================================================= */
+const L = (t, u) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+const P4N = id => `https://park4night.com/de/place/${id}`;
+const KOMOOT = id => `https://www.komoot.com/smarttour/${id}`;
+const GM = path => `https://www.google.com/maps/dir/${path}`;
+
+const TRIP = { start: new Date("2026-10-23T15:00:00+02:00"), end: new Date("2026-11-06T12:00:00+01:00") };
+
+/* Gemeinsame Anreise und Rückreise */
+const ANREISE = [
+  { iso: "2026-10-23", date: "Fr 23.10.", title: "Oberdiessbach – Bern – Basel – Freiburg i. Br.", km: "190 km", h: "2,5 h", start: "15:00", stay: `${L("Stellplatz Europa-Park-Stadion", P4N(227026))}, Suwonallee 1 (ca. 15 € / 24 h)`, poi: "freiburg", map: GM("Oberdiessbach/Suwonallee+1,+Freiburg+im+Breisgau") },
+  { iso: "2026-10-24", date: "Sa 24.10.", title: "Freiburg – Karlsruhe – Frankfurt – Kassel – Hannover", km: "615 km", h: "7,5–8 h", start: "09:00", stay: `${L("Stellplatz Hannover Nord", P4N(313379))}, Schulenburger Landstr. 130B (18 € / 24 h)`, poi: "hannover", map: GM("Suwonallee+1,+Freiburg+im+Breisgau/52.4070,9.7117"), note: "In Deutschland gross einkaufen – Norwegen ist teurer und sonntags zu." },
+  { iso: "2026-10-25", date: "So 25.10.", title: "Hannover Nord – Hamburg – Kiel Norwegenkai, Fähre 14:00", km: "240 km", h: "3 h", start: "07:30", stay: "Color Line Kiel – Oslo (Ankunft Mo 10:00)", poi: "kiel", map: GM("52.4070,9.7117/Norwegenkai,+Kiel"), note: "Zeitumstellung in der Nacht: eine Stunde mehr Schlaf. Check-in bis 12:00." },
+];
+const RUECKREISE = [
+  { iso: "2026-11-04", date: "Mi 4.11.", title: "Fähre Oslo – Kiel, 14:00 (Check-in bis 12:00)", km: "15 km", h: "30 min", start: "", stay: "Color Line (Ankunft Kiel Do 10:00)", poi: "hjortnes", map: GM("Bogstad+Camping,+Oslo/Color+Line+Terminal+Hjortnes,+Oslo") },
+  { iso: "2026-11-05", date: "Do 5.11.", title: "Kiel – Hamburg – Hannover – Kassel – Frankfurt – Bruchsal", km: "695 km", h: "8,5–9 h", start: "10:30", stay: `${L("Wohnmobilpark Bruchsal", P4N(390289))}, Sportzentrum 7 (25 € / 24 h)`, poi: "bruchsal", map: GM("Norwegenkai,+Kiel/49.1359,8.5871"), note: "Wenn es stockt: schon im Raum Frankfurt übernachten und Freitag 06:30 los." },
+  { iso: "2026-11-06", date: "Fr 6.11.", title: "Bruchsal – Karlsruhe – Basel – Bern – Oberdiessbach", km: "335 km", h: "ca. 4 h", start: "07:30", stay: "Zu Hause, ca. 11:30", poi: null, map: GM("49.1359,8.5871/Oberdiessbach") },
+];
+
+/* Orte mit Koordinaten (Plätze aus dem Plan; ca.-Werte, Google-Maps-Links sind exakt) */
+const POI = {
+  freiburg:  { n: "Stellplatz Europa-Park-Stadion", t: "camp", lat: 48.0215, lng: 7.8296, d: "Freiburg, Strom + Entsorgung", u: P4N(227026) },
+  hannover:  { n: "Stellplatz Hannover Nord", t: "camp", lat: 52.4070, lng: 9.7117, d: "inkl. Entsorgung", u: P4N(313379) },
+  kiel:      { n: "Color Line Norwegenkai", t: "ferry", lat: 54.3165, lng: 10.1355, d: "Fähre nach Oslo, Check-in bis 12:00", u: "https://www.google.com/maps/search/Norwegenkai+Kiel" },
+  hjortnes:  { n: "Color Line Terminal Hjortnes", t: "ferry", lat: 59.9120, lng: 10.7180, d: "Fähre nach Kiel, Check-in bis 12:00", u: "https://www.google.com/maps/search/Color+Line+Terminal+Hjortnes+Oslo" },
+  sandviken: { n: "Sandviken Camping", t: "camp", lat: 59.9891, lng: 8.8183, d: "Austbygde, Strom, Dusche, Küche; Kiwi 10 min zu Fuss", u: P4N(65302), v: "A" },
+  odda:      { n: "Trolltunga Camping", t: "camp", lat: 60.0560, lng: 6.5530, d: "Odda, am Sandvinsvatnet, ganzjährig", u: "https://www.visitnorway.com/listings/trolltunga-camping/501916/", v: "A" },
+  laerdal:   { n: "Lærdal Ferie- og Fritidspark", t: "camp", lat: 61.1000, lng: 7.4720, d: "am Fjord – wohl zu, Tel. +47 57 66 66 95", u: P4N(130701), v: "AB" },
+  laerdalA1: { n: "Ausweichplatz Erdalsvegen 39", t: "camp", lat: 61.0960, lng: 7.4000, d: "gratis, 1 Platz am Fjord, kein Strom", u: P4N(596096), v: "AB" },
+  laerdalA2: { n: "Ausweichplatz Revsnesvegen", t: "camp", lat: 61.0930, lng: 7.3900, d: "Sackgasse, ruhig, leicht schräg (Keile)", u: P4N(689480), v: "AB" },
+  laerdalE:  { n: "Ver- und Entsorgung an der E16", t: "dump", lat: 61.0990, lng: 7.4850, d: "Lærdal, Frischwasser, Grau-/Schwarzwasser", u: P4N(343551), v: "AB" },
+  beito:     { n: "First Camp Beitostølen", t: "camp", lat: 61.2450, lng: 8.9120, d: "ganzjährig, Sauna, Gehdistanz Zentrum", u: P4N(186035), v: "AB" },
+  bogstad:   { n: "TopCamp Bogstad", t: "camp", lat: 59.9630, lng: 10.6400, d: "Oslo, ganzjährig, 30 min zum Terminal", u: P4N(15398) },
+  trabelia:  { n: "Trabelia Hyttegrend & Camping", t: "camp", lat: 61.6091, lng: 10.0693, d: "Venabygd, 350 NOK ohne Strom, Dusche + Küche", u: P4N(112118), v: "BC" },
+  lunde:     { n: "Lundecamp (Ausweich)", t: "camp", lat: 61.6250, lng: 10.0950, d: "inkl. Strom; Supermarkt nebenan, auch sonntags", u: P4N(457449), v: "BC" },
+  fagernes:  { n: "Fagernes Camping Park", t: "camp", lat: 60.9850, lng: 9.2420, d: "ganzjährig, Sauna, gratis Leih-Spikes", u: P4N(202872), v: "B" },
+  funas:     { n: "Funäsdalens Fjällcamping", t: "camp", lat: 62.5566, lng: 12.5690, d: "Ljusnedal, 450 SEK inkl. Strom, Sauna 14–22", u: P4N(427158), v: "C" },
+  roros:     { n: "Røros Camping Håneset (Ausweich)", t: "camp", lat: 62.5640, lng: 11.4000, d: "Wintercamping, ca. 350 NOK", u: "https://www.campercontact.com/en/md/66491", v: "C" },
+  bruchsal:  { n: "Wohnmobilpark Bruchsal", t: "camp", lat: 49.1359, lng: 8.5871, d: "ganzjährig, 25 € / 24 h", u: P4N(390289) },
+  /* Gas */
+  g_notodden: { n: "AGA-Automat Notodden", t: "gas", lat: 59.5640, lng: 9.2560, d: "Merdevegen 14A · 24/7", u: "https://maps.google.com/?cid=15575227343579603465", v: "A" },
+  g_oyer:     { n: "AGA-Automat Øyer", t: "gas", lat: 61.2650, lng: 10.4120, d: "Kongsvegen 10 · 24/7 · letzter vor Rondane", u: "https://maps.google.com/?cid=78665600362966868", v: "BC" },
+  g_lilleh1:  { n: "AGA-Automat Lillehammer", t: "gas", lat: 61.1210, lng: 10.4560, d: "Gausdalsvegen 6 · 24/7", u: "https://maps.google.com/?cid=16994667484614183535", v: "BC" },
+  g_lilleh2:  { n: "AGA-Automat Søre Ål", t: "gas", lat: 61.1000, lng: 10.4800, d: "Hagevegen 8A · 24/7", u: "https://maps.google.com/?cid=4665746300847103650", v: "BC" },
+  g_fagernes: { n: "AGA-Automat Fagernes", t: "gas", lat: 60.9860, lng: 9.2330, d: "Jernbanevegen 40 · 24/7", u: "https://maps.google.com/?cid=12165892054364036141", v: "AB" },
+  g_honefoss: { n: "AGA-Automat Hønefoss", t: "gas", lat: 60.1680, lng: 10.2550, d: "Øvre Klekkenvei 53 · 24/7", u: "https://maps.google.com/?cid=12813440661368655817", v: "AB" },
+  g_eiks:     { n: "AGA-Automat Eiksmarka", t: "gas", lat: 59.9480, lng: 10.6170, d: "Vollsveien 180 · 24/7 · nächster zu Bogstad", u: "https://maps.google.com/?cid=6242436220741332429" },
+  g_hoff:     { n: "AGA-Automat Hoffsveien", t: "gas", lat: 59.9290, lng: 10.6750, d: "Engebrets vei 5 · 24/7", u: "https://maps.google.com/?cid=9732921772858306433" },
+  g_jar:      { n: "AGA-Automat Jar", t: "gas", lat: 59.9260, lng: 10.6200, d: "Storengveien 8 · 24/7", u: "https://maps.google.com/?cid=9431964098014997669" },
+  g_leirdal:  { n: "AGA-Automat Leirdal", t: "gas", lat: 59.9380, lng: 10.8800, d: "Gamle Leirdalsvei 2 · 24/7", u: "https://maps.google.com/?cid=8151539215569301779" },
+  g_hellerud: { n: "AGA-Automat Hellerud", t: "gas", lat: 59.9150, lng: 10.8350, d: "Tvetenveien 170 · 24/7", u: "https://maps.google.com/?cid=4225529394423265677" },
+  g_voss:     { n: "Voss Gas (LPG-Füllstelle)", t: "gas", lat: 60.6550, lng: 6.4400, d: "füllt ausländische Flaschen · Mo–Do 10–17, Fr 9–19, Sa 10–15", u: "https://maps.google.com/?cid=11501275794026212586", v: "A" },
+  g_bryn:     { n: "LPG Oslo / Propaneksperten", t: "gas", lat: 59.9100, lng: 10.8200, d: "füllt Campingflaschen · Mo–Fr 9–16, Sa 11–16", u: "https://maps.google.com/?cid=4138122035524290780" },
+  g_roros:    { n: "LPG Røros", t: "gas", lat: 62.5800, lng: 11.3900, d: "füllt ausländische Flaschen · Mo–Fr bis 16:30, Sa bis 14:00", u: "https://maps.google.com/?cid=14470858873088811274", v: "C" },
+  g_tynset:   { n: "Gass 24/7 Tynset", t: "gas", lat: 62.2750, lng: 10.7800, d: "anderer Anbieter, vorher anrufen: +47 92 09 11 43", u: "https://maps.google.com/?cid=9193730146954869412", v: "C" },
+  g_okq8:     { n: "OKQ8 Funäsdalen", t: "gas", lat: 62.5450, lng: 12.5500, d: "Rörosvägen 47 · täglich bis 21 · Gasol-Tausch unklar", u: "https://www.google.com/maps/search/OKQ8+Funäsdalen", v: "C" },
+};
+
+const ROUTES = {
+  A: {
+    key: "A", color: "var(--a)", name: "West", title: "Tinnsjø, Hardanger, Lærdal, Valdres",
+    tagline: "Fjorde, Gletscher Buerbreen, Fjordangeln an zwei Orten",
+    drive: "5 / 4", angeln: "Fjord, frei", risk: "Dauerregen im Westen, Haukelifjell, Platz in Lærdal wohl zu",
+    longest: "Tag 2 · 215 km · 4,5 h",
+    nights: [["Tinnsjø", 1], ["Odda", 3], ["Lærdal", 2], ["Beitostølen", 2], ["Oslo", 1]],
+    intro: "Alle Fahretappen liegen bei 2,5–4,5 Stunden. An Ruhetagen bleibt das Motorhome stehen – gewandert wird ab Campingplatz. Touren mit Anfahrt liegen auf Fahrtagen.",
+    maps: [
+      ["Gesamtroute A", GM("Color+Line+Terminal+Hjortnes,+Oslo/59.9891,8.8183/Haukeliseter/Trolltunga+Camping,+Odda/Fl%C3%A5m/L%C3%A6rdal+Ferie-+og+Fritidspark/Borgund+stavkyrkje/First+Camp+Beitost%C3%B8len/Bogstad+Camping,+Oslo")],
+    ],
+    days: [
+      { iso: "2026-10-26", date: "Mo 26.10.", title: "Oslo – Kongsberg – Notodden – Tinnsjø – Austbygde", km: "165 km", h: "3–3,5 h", hike: "Sandviken-Runde ab Platz (3 km)", stay: `${L("Sandviken Camping", P4N(65302))}, Austbygde`, poi: "sandviken", map: GM("Color+Line+Terminal+Hjortnes,+Oslo/59.9891,8.8183"), note: "AGA-Tausch in Notodden auf dem Weg." },
+      { iso: "2026-10-27", date: "Di 27.10.", title: "Austbygde – Rjukan – Vemork – Rauland – Haukelifjell – Røldal – Odda", km: "215 km", h: "4,5 h + Stopps", hike: "Vemork-Hängebrücke, Wasserfall Låtefoss", stay: `${L("Trolltunga Camping", "https://www.visitnorway.com/listings/trolltunga-camping/501916/")}, Odda`, poi: "odda", map: GM("59.9891,8.8183/Vemork/Haukeliseter/L%C3%A5tefoss/Trolltunga+Camping,+Odda"), note: "Längster Fahrtag: ca. 08:00 los. Vorabend und morgens E134 Haukelifjell prüfen." },
+      { iso: "2026-10-28", date: "Mi 28.10.", title: "Ruhetag Odda", rest: true, hike: "Buerbreen zu Fuss ab Platz (5–6 h)", stay: "dito", poi: "odda" },
+      { iso: "2026-10-29", date: "Do 29.10.", title: "Ruhetag Odda", rest: true, hike: "Odda und Fjordufer zu Fuss, Angeln", stay: "dito", poi: "odda" },
+      { iso: "2026-10-30", date: "Fr 30.10.", title: "Odda – Hardangerbrua – Voss – Gudvangen – Flåm – Lærdal", km: "200 km", h: "3,5–4 h", hike: "Brekkefossen ab Flåm", stay: `${L("Lærdal Ferie- og Fritidspark", "https://camplinq.com/camps/lrdal-ferie-og-fritidspark")} (wohl zu – anrufen)`, poi: "laerdal", map: GM("Trolltunga+Camping,+Odda/Fl%C3%A5m/L%C3%A6rdal+Ferie-+og+Fritidspark") },
+      { iso: "2026-10-31", date: "Sa 31.10.", title: "Ruhetag Lærdal", rest: true, hike: "Torsstein-Weg ab Lærdalsøyri", stay: "dito", poi: "laerdal", note: "Für Sonntag einkaufen – Läden haben sonntags zu." },
+      { iso: "2026-11-01", date: "So 1.11.", title: "Lærdal – Borgund – Filefjell (E16) – Fagernes – Beitostølen", km: "190 km", h: "3–3,5 h", hike: "Kongevegen ab Stabkirche Borgund", stay: `${L("First Camp Beitostølen", P4N(186035))}`, poi: "beito", map: GM("L%C3%A6rdal+Ferie-+og+Fritidspark/Borgund+stavkyrkje/Fagernes/First+Camp+Beitost%C3%B8len"), note: "AGA-Tausch in Fagernes möglich." },
+      { iso: "2026-11-02", date: "Mo 2.11.", title: "Ruhetag Valdres", rest: true, hike: "Fjelltour ab Ortszentrum", stay: "dito", poi: "beito", note: "Beste Nordlicht-Chance der Reise." },
+      { iso: "2026-11-03", date: "Di 3.11.", title: "Beitostølen – Fagernes – Hønefoss – Oslo", km: "220 km", h: "3,5–4 h", stay: `${L("TopCamp Bogstad", P4N(15398))}, Oslo`, poi: "bogstad", map: GM("First+Camp+Beitost%C3%B8len/Bogstad+Camping,+Oslo") },
+    ],
+    places: [
+      { t: "Tinnsjø: Sandviken", d: "Tag 1", items: [
+        ["Warum nur eine Nacht", `Die guten Touren um Rjukan (z. B. Gaustatoppen) brauchen alle eine Anfahrt; der Parkplatz Stavsro ist auf 7 m begrenzt (${L("Campercontact", "https://www.campercontact.com/en/norway/telemark/hjartdal/23810/parking-gaustatoppen.md")}). Der Ruhetag geht deshalb nach Odda.`],
+        ["Standplatz", `${L("Sandviken Camping", P4N(65302))} in Austbygde am Nordende des Tinnsjø, ganzjährig; bis 500 NOK inkl. Strom, Dusche, Küche; park4night 4,6/5 (129). Kiwi, Bank, Tankstelle ca. 10 Gehminuten.`],
+        ["Wandern ab Platz", `Runde über die Holzbrücke nach Austbygde, 3 km, 40 Hm, ca. 50 min (${L("Komoot", KOMOOT(31059544))}).`],
+        ["Einkauf", "Gross in Kongsberg oder Notodden; der Kiwi in Austbygde reicht für Kleinigkeiten."],
+        ["Achtung", `Seilbahn Krossobanen seit 2024 stillgelegt (${L("Lokalhistoriewiki", "https://lokalhistoriewiki.no/wiki/Rjukan")}).`],
+      ]},
+      { t: "Hardanger: Odda", d: "Tag 2–4", items: [
+        ["Fahrtag", "215 km, mit Motorhome ca. 4,5 h plus Stopps, ca. 08:00 los. Halt bei Vemork (Hängebrücke, ca. 1 h, Winteröffnung Museum prüfen) und am Låtefoss an der Rv13. Ankunft ca. 15:00. Bei schlechter Strasse Vemork weglassen."],
+        ["Haukelifjell", `E134, höchster Punkt 1085 m, schneeanfällig; Kolonnenfahrt und kurze Sperrungen möglich (${L("Wikipedia", "https://en.wikipedia.org/wiki/Haukelifjell")}). Im Zweifel zweite Nacht in Sandviken, dafür ein Ruhetag in Odda weniger.`],
+        ["Standplatz", "Trolltunga Camping am Sandvinsvatnet, 2 km vom Zentrum, ganzjährig. Lofthus Camping nur Mai–September."],
+        ["Ruhetag 1 – Buerbreen", `Buer liegt ca. 5 km vom Platz, von dort ca. 3 h hin und zurück zur Gletscherzunge. Gesamt 5–6 h: spätestens 09:00 los, Umkehr spätestens 14:00 (${L("camping.no", "https://camping.no/en/campingplasser/1406873")}).`],
+        ["Ruhetag 2 – Fjord und Ort", "Zu Fuss ins Zentrum (2 km) und ans Fjordufer; Meeresangeln ohne Lizenz."],
+        ["Trolltunga", "Solo Ende Oktober nicht empfohlen – lange Strecke, kurze Tage, Schnee, nur mit Anfahrt."],
+      ]},
+      { t: "Sognefjord: Lærdal", d: "Tag 5–6", items: [
+        ["Fahrtag mit Wasserfall", `In Flåm parken, zum Brekkefossen: ca. 5 km hin und zurück, 155 Hm, 2,5–3 h, ab 1,5 km steinig und steil (${L("Fjord Norway", "https://www.fjordnorway.com/en/see-and-do/brekkefossen-waterfall-hike")}). Danach 45 min durch den Lærdalstunnel, Ankunft ca. 15:00.`],
+        ["Standplatz – vorher klären", `${L("Lærdal Ferie- og Fritidspark", P4N(130701))} am Fjord: ACSI nennt Saisonende 24.10. – wahrscheinlich zu. Anrufen: +47 57 66 66 95. Ausweich gratis, ohne Strom, je 1 Platz: ${L("Erdalsvegen 39", P4N(596096))} und ${L("Revsnesvegen", P4N(689480))} (Keile). Entsorgung an der E16 (${L("park4night", P4N(343551))}). Mit voller Gasflasche ankommen.`],
+        ["Plan B", "Ist der Platz zu und die Einzelplätze zu unsicher: nur eine Nacht Lærdal, Samstag weiter nach Beitostølen (drei Nächte dort). Borgund Hyttesenter und Flåm Camping (bis 15.10.) sind zu."],
+        ["Ruhetag – Torsstein", `Start im Wohngebiet Ofta beim Spital. Ganze Tour 12,4 km, 1204 Hm, ca. 4 h, anspruchsvoll (${L("UT.no", "https://ut.no/turforslag/1112155445/fottur-til-torsstein")}). Realistisch: bis Aussichtspunkt Hundersnosi; Gipfel (1170 m) nur schneefrei.`],
+        ["Am Platz", "Fjordangeln direkt am Ufer, Spaziergang durch das alte Lærdalsøyri. Samstag für Sonntag einkaufen."],
+      ]},
+      { t: "Valdres: Beitostølen", d: "Tag 7–8", items: [
+        ["Fahrtag mit Kulturweg", `Nach 30 km Halt an der Stabkirche Borgund; dahinter beginnt ein leichter Abschnitt des Kongevegen Richtung Vindhella, 1–2 h (${L("Norway's Best", "https://www.norwaysbest.com/no/laerdal/aktiviteter/borgund-stavkirke-og-kongevegen")}). Danach E16 über den Filefjell, ganzjährig geräumt.`],
+        ["Standplatz", `${L("First Camp Beitostølen", P4N(186035))} am Fuss von Jotunheimen, ganzjährig, Sauna, Gehdistanz Zentrum.`],
+        ["Ruhetag – Fjelltour ab Ort", "Wege beginnen im Ortszentrum; Route je nach Schnee wählen (siehe Touren). Bitihorn nicht eingeplant: Anfahrt über Fv51, Saison endet im Oktober."],
+        ["Nordlicht", "Beste Chance der Reise. Zu Fuss aus dem Ort auf offenes Gelände mit freiem Nordhorizont; Stirnlampe und Spikes mit."],
+        ["Angeln", `Im November begrenzt – Saison der Bergseen auf ${L("inatur.no", "https://www.inatur.no")} prüfen; Eis noch nicht tragfähig.`],
+      ]},
+    ],
+    hikes: [
+      { day: "Tag 1", n: "Sandviken-Runde", start: "Sandviken Camping, ab Platz", km: "3,0", hm: "40", time: "ca. 50 min", lvl: "leicht", u: KOMOOT(31059544) },
+      { day: "Tag 2", n: "Vemork-Hängebrücke", start: "Parkplatz Museum Vemork (Fahrtag)", time: "ca. 1 h mit Museum", lvl: "leicht" },
+      { day: "Tag 2", n: "Wasserfall Låtefoss", start: "Parkplatz an der Rv13 (Fahrtag)", time: "Fotostopp, 15 min", lvl: "leicht" },
+      { day: "Tag 3", n: "Gletscherzunge Buerbreen", start: "zu Fuss ab Trolltunga Camping nach Buer (ca. 5 km je Weg), dort Rundweg", km: "4,4 (gesamt ca. 14)", hm: "310", time: "gesamt 5–6 h", lvl: "mittel", u: "https://www.komoot.com/tour/54633375" },
+      { day: "Tag 4", n: "Odda – Sandvin", start: "ab Platz bzw. Zentrum Odda", km: "11,4", hm: "320", time: "ca. 3:20 h", lvl: "mittel", u: "https://www.komoot.com/guide/664312/hiking-around-odda" },
+      { day: "Tag 5", n: "Brekkefossen", start: "Parkplatz in Flåm (Fahrtag)", km: "5,9", hm: "130", time: "ca. 1:45 h", lvl: "leicht", u: KOMOOT(724845) },
+      { day: "Tag 6", n: "Torsstein bis Aussichtspunkt Hundersnosi", start: "Wohngebiet Ofta beim Spital, zu Fuss ab Platz", km: "12,4 (ganz)", hm: "1204", time: "ca. 4 h", lvl: "schwer", u: "https://ut.no/turforslag/1112155445/fottur-til-torsstein" },
+      { day: "Tag 6 · Alt.", n: "Lærdalsøyri-Runde über Storehaugen (908 m)", start: "Lærdalsøyri, ab Platz", km: "12,2", hm: "960", time: "ca. 5 h", lvl: "schwer", u: "https://www.komoot.com/smarttour/e2666390481/lrdalsyri-loop" },
+      { day: "Tag 7", n: "Kongevegen Vindhella – Stabkirche Borgund", start: "Stabkirche Borgund (Fahrtag)", km: "6,1", hm: "230", time: "ca. 2 h", lvl: "leicht", u: KOMOOT(10867146) },
+      { day: "Tag 8", n: "Tutjern – Seenblick-Runde", start: "Beitostølen, ab Platz", km: "6,9", hm: "260", time: "ca. 2:10 h", lvl: "mittel", u: KOMOOT(31076785) },
+      { day: "Tag 8 · Alt.", n: "Holzsteg – Seenblick-Runde (bis 1110 m)", start: "Beitostølen, ab Platz", km: "8,7", hm: "270", time: "ca. 2:40 h", lvl: "mittel", u: KOMOOT(1076675) },
+      { day: "Tag 8 · Alt.", n: "Birkenwald-Runde (Schlechtwetter)", start: "Beitostølen, ab Platz", km: "4,3", hm: "160", time: "ca. 1:20 h", lvl: "leicht", u: KOMOOT(31071777) },
+    ],
+    aurora: "Beitostølen am 1. und 2.11. ist die beste Chance. In den engen Tälern von Odda und Lærdal ist der Nordhorizont meist verdeckt; um den 26.10. ist Vollmond.",
+    daylight: [["Rjukan", "27.10.", "07:30", "16:50"], ["Odda", "29.10.", "07:45", "16:50"], ["Lærdal", "31.10.", "07:50", "16:35"], ["Beitostølen", "2.11.", "07:50", "16:25"]],
+    suggestions: ["Lohnt sich Variante A bei der aktuellen Wetterlage?", "Was mache ich, wenn das Haukelifjell gesperrt ist?", "Lærdal-Platz ist zu – welcher Ausweichplatz ist besser?", "Wie plane ich den Buerbreen-Tag solo sicher?"],
+  },
+  B: {
+    key: "B", color: "var(--b)", name: "Ost", title: "Rondane, Valdres, Lærdal",
+    tagline: "Trockenes, kaltes Fjell, Rondane, Fjordangeln in Lærdal",
+    drive: "5 / 4", angeln: "Fjord Lærdal, frei", risk: "Langer erster Tag, Platz in Lærdal wohl zu",
+    longest: "Tag 1 · 250 km · 4–4,5 h",
+    nights: [["Rondane", 2], ["Fagernes", 2], ["Lærdal", 2], ["Beitostølen", 2], ["Oslo", 1]],
+    intro: "Variante B meidet den nassen Westen, das Haukelifjell und das Valdresflye; einziger Pass ist der ganzjährig geräumte Filefjell (E16, ca. 1000 m). Fahrzeit in Norwegen ca. 17–18 h. Die E16 zwischen Fagernes und Lærdal fährst du zweimal.",
+    maps: [
+      ["Gesamtroute B", GM("Color+Line+Terminal+Hjortnes,+Oslo/61.6091,10.0693/Fagernes+Camping+Park/Borgund+stavkyrkje/L%C3%A6rdal+Ferie-+og+Fritidspark/Fagernes/First+Camp+Beitost%C3%B8len/Bogstad+Camping,+Oslo")],
+    ],
+    days: [
+      { iso: "2026-10-26", date: "Mo 26.10.", title: "Oslo – E6 – Lillehammer – Ringebu – Venabygdsfjellet", km: "250 km", h: "4–4,5 h", stay: `${L("Trabelia Hyttegrend & Camping", P4N(112118))}, Venabygd`, poi: "trabelia", map: GM("Color+Line+Terminal+Hjortnes,+Oslo/61.6091,10.0693"), note: "Abfahrt ca. 11:00, Ankunft ca. 15:30. Einkauf bei Lillehammer, AGA-Tausch in Øyer oder Lillehammer. Sonnenuntergang ca. 16:40." },
+      { iso: "2026-10-27", date: "Di 27.10.", title: "Ruhetag Rondane", rest: true, hike: "Trabelifjellet-Sattel ab Platz", stay: "dito", poi: "trabelia" },
+      { iso: "2026-10-28", date: "Mi 28.10.", title: "Venabygd – Ringebu – Lillehammer – Torpa – Fagernes", km: "175 km", h: "3–3,5 h", stay: `${L("Fagernes Camping Park", P4N(202872))}`, poi: "fagernes", map: GM("61.6091,10.0693/Fagernes+Camping+Park"), note: "Ohne Pass über 1000 m. Vorräte in Lillehammer auffüllen." },
+      { iso: "2026-10-29", date: "Do 29.10.", title: "Ruhetag Fagernes", rest: true, hike: "Fodnesåsen-Runde ab Ort", stay: "dito", poi: "fagernes" },
+      { iso: "2026-10-30", date: "Fr 30.10.", title: "Fagernes – E16 Filefjell – Borgund – Lærdal", km: "140 km", h: "2,5 h", hike: "Kongevegen ab Stabkirche Borgund", stay: `${L("Lærdal Ferie- og Fritidspark", "https://camplinq.com/camps/lrdal-ferie-og-fritidspark")} (wohl zu)`, poi: "laerdal", map: GM("Fagernes+Camping+Park/Borgund+stavkyrkje/L%C3%A6rdal+Ferie-+og+Fritidspark") },
+      { iso: "2026-10-31", date: "Sa 31.10.", title: "Ruhetag Lærdal", rest: true, hike: "Torsstein-Weg oder Storehaugen-Runde ab Ort", stay: "dito", poi: "laerdal", note: "Für Sonntag einkaufen." },
+      { iso: "2026-11-01", date: "So 1.11.", title: "Lærdal – Filefjell (E16) – Fagernes – Beitostølen", km: "190 km", h: "3–3,5 h", stay: `${L("First Camp Beitostølen", P4N(186035))}`, poi: "beito", map: GM("L%C3%A6rdal+Ferie-+og+Fritidspark/Fagernes/First+Camp+Beitost%C3%B8len") },
+      { iso: "2026-11-02", date: "Mo 2.11.", title: "Ruhetag Beitostølen", rest: true, hike: "Tutjern- oder Seenblick-Runde ab Ort", stay: "dito", poi: "beito", note: "Beste Nordlicht-Chance der Reise." },
+      { iso: "2026-11-03", date: "Di 3.11.", title: "Beitostølen – Fagernes – Hønefoss – Oslo", km: "220 km", h: "3,5–4 h", stay: `${L("TopCamp Bogstad", P4N(15398))}, Oslo`, poi: "bogstad", map: GM("First+Camp+Beitost%C3%B8len/Bogstad+Camping,+Oslo") },
+    ],
+    places: [
+      { t: "Rondane: Venabygdsfjellet", d: "Tag 1–2", items: [
+        ["Langer erster Tag", "Ankunft Oslo 10:00, Abfahrt ca. 11:00, Ankunft am Platz ca. 15:30 (Google 3:25 h für 250 km; auf der E6 meldet Google derzeit Sperrungen mit Umleitung)."],
+        ["Standplatz", `${L("Trabelia Hyttegrend & Camping", P4N(112118))}, Rondevegen 236, ca. 10 min oberhalb der E6; ganzjährig, 350 NOK ohne Strom, Duschen und Küche inkl., park4night 4,7/5 (44). Strompreis und Platzlänge telefonisch klären.`],
+        ["Ausweichplatz", `${L("Lundecamp", P4N(457449))}, 4 km weiter oben (Rondevegen 770), ganzjährig, 350–400 NOK inkl. Strom, Supermarkt nebenan auch sonntags offen; Schotter (Keile), park4night 3,2/5.`],
+        ["Entfallen", "Rondetunet und Skogli Camping (nur bis September), Otta Camping (nur bis 15. Oktober)."],
+        ["Wandern ab Platz", `Trabelifjellet-Sattel, 7,5 km, 220 Hm, ca. 2:15 h (${L("Komoot", KOMOOT(34343252))}). Länger: Gulltjønnet-Runde ab Wanderparkplatz, 9,9 km, 160 Hm, ca. 2:45 h (${L("Komoot", KOMOOT(31076699))}); Parkplatz je ca. 2 km zu Fuss.`],
+        ["Nordlicht", "Vollmond um den 26.10. – helle Nächte. Für freien Nordblick zu Fuss aufs offene Fjell oberhalb des Platzes."],
+        ["Wildtiere", "Rondane ist Wildrentiergebiet: Herden nicht stören, gross Abstand halten."],
+      ]},
+      { t: "Fagernes", d: "Tag 3–4", items: [
+        ["Fahrt", "Über Ringebu, Lillehammer, Torpa (Fv250) und Fv33 nach Fagernes, 176 km, 2:40 h, ohne Pass über 1000 m."],
+        ["Standplatz", `${L("Fagernes Camping Park", P4N(202872))} am Strandefjorden, ganzjährig, Sauna am Wasser, gratis Leih-Spikes, Gehdistanz Zentrum und Valdres Folkemuseum.`],
+        ["Wandern ab Platz", `Fodnesåsen-Runde, 7,1 km, 390 Hm durch ein Naturreservat, anspruchsvoll (${L("Komoot", KOMOOT(10867258))}). Komoot-Zeit gilt fürs Laufen: 2,5–3 h einplanen. Leicht: Uferweg am Strandefjorden und Freilichtmuseum.`],
+      ]},
+      { t: "Lærdal", d: "Tag 5–6", items: [
+        ["Unterwegs", "Kongevegen bei der Stabkirche Borgund (6,1 km, ca. 2 h)."],
+        ["Platz", `Wie in Variante A: ${L("Lærdal Ferie- og Fritidspark", P4N(130701))} wohl zu – anrufen (+47 57 66 66 95). Einfache Lösung in B: Lærdal streichen, je eine Nacht länger in Fagernes (28.–31.10.) und Beitostølen (31.10.–3.11.). Dann fehlt nur das Fjordangeln.`],
+        ["Ruhetag", "Torsstein- oder Storehaugen-Tour ab Lærdalsøyri, Fjordangeln am Platz."],
+        ["Einkauf", "Samstag, 31.10., in Lærdal für den Sonntag einkaufen."],
+      ]},
+      { t: "Valdres: Beitostølen", d: "Tag 7–8", items: [
+        ["Standplatz", `${L("First Camp Beitostølen", P4N(186035))}, ganzjährig, Sauna, Gehdistanz Zentrum.`],
+        ["Ruhetag", "Runden ab Ortszentrum (Tutjern, Seenblick, Birkenwald – siehe Touren)."],
+        ["Nordlicht", "Beitostølen am 1. und 2.11. ist auch in Variante B die beste Chance der Reise."],
+      ]},
+    ],
+    hikes: [
+      { day: "Tag 2", n: "Trabelifjellet-Sattel", start: "Trabelia, ab Platz", km: "7,5", hm: "220", time: "ca. 2:15 h", lvl: "mittel", u: KOMOOT(34343252) },
+      { day: "Tag 2 · Alt.", n: "Gulltjønnet-Runde", start: "Wanderparkplatz Venabygdsfjellet (2 km zu Fuss)", km: "9,9", hm: "160", time: "ca. 2:45 h", lvl: "leicht", u: KOMOOT(31076699) },
+      { day: "Tag 4", n: "Fodnesåsen-Runde", start: "Fagernes, ab Platz", km: "7,1", hm: "390", time: "2,5–3 h", lvl: "schwer", u: KOMOOT(10867258) },
+      { day: "Tag 5", n: "Kongevegen Vindhella – Stabkirche Borgund", start: "Stabkirche Borgund (Fahrtag)", km: "6,1", hm: "230", time: "ca. 2 h", lvl: "leicht", u: KOMOOT(10867146) },
+      { day: "Tag 6", n: "Torsstein bis Aussichtspunkt Hundersnosi", start: "Wohngebiet Ofta beim Spital", km: "12,4 (ganz)", hm: "1204", time: "ca. 4 h", lvl: "schwer", u: "https://ut.no/turforslag/1112155445/fottur-til-torsstein" },
+      { day: "Tag 6 · Alt.", n: "Lærdalsøyri-Runde über Storehaugen", start: "Lærdalsøyri, ab Platz", km: "12,2", hm: "960", time: "ca. 5 h", lvl: "schwer", u: "https://www.komoot.com/smarttour/e2666390481/lrdalsyri-loop" },
+      { day: "Tag 8", n: "Tutjern – Seenblick-Runde", start: "Beitostølen, ab Platz", km: "6,9", hm: "260", time: "ca. 2:10 h", lvl: "mittel", u: KOMOOT(31076785) },
+      { day: "Tag 8 · Alt.", n: "Holzsteg – Seenblick-Runde", start: "Beitostølen, ab Platz", km: "8,7", hm: "270", time: "ca. 2:40 h", lvl: "mittel", u: KOMOOT(1076675) },
+      { day: "Tag 8 · Alt.", n: "Birkenwald-Runde (Schlechtwetter)", start: "Beitostølen, ab Platz", km: "4,3", hm: "160", time: "ca. 1:20 h", lvl: "leicht", u: KOMOOT(31071777) },
+    ],
+    aurora: "Beitostølen am 1. und 2.11. ist die beste Chance. In Rondane um den 26.10. Vollmond – helle Nächte; trotzdem aufs offene Fjell oberhalb des Platzes.",
+    daylight: [["Venabygd", "26.10.", "ca. 07:45", "ca. 16:40"], ["Lærdal", "31.10.", "07:50", "16:35"], ["Beitostølen", "2.11.", "07:50", "16:25"]],
+    suggestions: ["Lærdal ist zu – lohnt sich dann B überhaupt noch?", "Was kaufe ich am Montag in Lillehammer ein?", "Fodnesåsen bei Schnee machbar?", "Wo tausche ich das Gas auf Variante B am besten?"],
+  },
+  C: {
+    key: "C", color: "var(--c)", name: "Rondane + Härjedalen", title: "Venabygdsfjellet, Røros, Funäsdalen (SE)",
+    tagline: "Grösste Einsamkeit, offenes Fjell auf 62,5° N, Nordlicht, meiste Ruhetage",
+    drive: "4 / 5", angeln: "nur Seen, Fiskekort nötig", risk: "Zwei lange Fahrtage (4,5–5 h), Grenze und Zoll, keine Fjorde",
+    longest: "Tag 3 + 7 · 275 km · 4,5–5 h",
+    nights: [["Rondane", 2], ["Funäsdalen", 4], ["Rondane", 2], ["Oslo", 1]],
+    intro: "Über Rondane und Røros nach Funäsdalen in Schweden und auf gleichem Weg zurück; das Venabygdsfjellet dient vor und nach Schweden als Etappenort. 4 Fahrtage, 5 Ruhetage, Fahrzeit gesamt ca. 17–19 h. Die Fahrt nach Schweden ist mit 275 km am oberen Limit.",
+    maps: [
+      ["Gesamtroute C", GM("Color+Line+Terminal+Hjortnes,+Oslo/61.6091,10.0693/R%C3%B8ros/62.5566,12.5690/R%C3%B8ros/61.6091,10.0693/Bogstad+Camping,+Oslo")],
+    ],
+    days: [
+      { iso: "2026-10-26", date: "Mo 26.10.", title: "Oslo – E6 – Lillehammer – Ringebu – Venabygdsfjellet", km: "250 km", h: "4–4,5 h", stay: `${L("Trabelia Hyttegrend & Camping", P4N(112118))}, Venabygd`, poi: "trabelia", map: GM("Color+Line+Terminal+Hjortnes,+Oslo/61.6091,10.0693"), note: "AGA-Tausch in Øyer/Lillehammer – bis Schweden und zurück gibt es keinen sicheren AGA-Automaten." },
+      { iso: "2026-10-27", date: "Di 27.10.", title: "Ruhetag Rondane", rest: true, hike: "Trabelifjellet-Sattel ab Platz", stay: "dito", poi: "trabelia", note: "Wirklich ruhen – morgen ist der lange Tag nach Schweden." },
+      { iso: "2026-10-28", date: "Mi 28.10.", title: "Venabygd – Atna – Tynset – Røros – Grenze – Funäsdalen", km: "275 km", h: "4,5–5 h", hike: "Kurzer Rundgang Røros (UNESCO)", stay: `${L("Funäsdalens Fjällcamping", P4N(427158))}, Ljusnedal`, poi: "funas", map: GM("61.6091,10.0693/R%C3%B8ros/62.5566,12.5690"), note: "Zu lang? In Røros übernachten (Håneset) – dann fällt ein Ruhetag in Funäsdalen weg." },
+      { iso: "2026-10-29", date: "Do 29.10.", title: "Ruhetag Funäsdalen", rest: true, hike: "Funäsdalsberget-Gipfelrunde, zu Fuss ab Platz", stay: "dito", poi: "funas" },
+      { iso: "2026-10-30", date: "Fr 30.10.", title: "Ruhetag Funäsdalen", rest: true, hike: "Hamrafjället (20 min Anfahrt) oder lange Funäsdalsberget-Runde", stay: "dito", poi: "funas", note: "Hamrafjället nur bei klarem, ruhigem Wetter. Start spätestens 09:00, Umkehr 13:30." },
+      { iso: "2026-10-31", date: "Sa 31.10.", title: "Ruhetag Funäsdalen", rest: true, hike: "Kurze Runde ab Kirche Funäsdalen", stay: "dito", poi: "funas", note: "Für Sonntag einkaufen – Røros hat am 1.11. zu." },
+      { iso: "2026-11-01", date: "So 1.11.", title: "Funäsdalen – Røros – Tynset – Atna – Venabygd", km: "275 km", h: "4,5–5 h", stay: `${L("Trabelia Hyttegrend & Camping", P4N(112118))}`, poi: "trabelia", map: GM("62.5566,12.5690/R%C3%B8ros/61.6091,10.0693"), note: "Wiedereinreise Norwegen: Zollfreimengen beachten (toll.no)." },
+      { iso: "2026-11-02", date: "Mo 2.11.", title: "Ruhetag Rondane", rest: true, hike: "Gulltjønnet-Runde", stay: "dito", poi: "trabelia", note: "Abnehmender Mond – gute Nordlichtnächte." },
+      { iso: "2026-11-03", date: "Di 3.11.", title: "Venabygd – Ringebu – Lillehammer – Oslo", km: "250 km", h: "4–4,5 h", stay: `${L("TopCamp Bogstad", P4N(15398))}, Oslo`, poi: "bogstad", map: GM("61.6091,10.0693/Bogstad+Camping,+Oslo") },
+    ],
+    places: [
+      { t: "Rondane: Venabygdsfjellet", d: "Tag 1–2 und 7–8", items: [
+        ["Platz", `${L("Trabelia", P4N(112118))} (350 NOK ohne Strom), Ausweich ${L("Lundecamp", P4N(457449))} – beide ganzjährig. Wandern wie in Variante B.`],
+        ["Mond", "Die zweite Rondane-Phase (1.–2.11.) fällt in den abnehmenden Mond: gute Nordlichtnächte."],
+        ["Belastung", "Tag 1 und Tag 3 sind die zwei längsten Fahrtage und liegen nur einen Ruhetag auseinander. Am Ruhetag dazwischen wirklich ruhen."],
+      ]},
+      { t: "Fahrt nach Schweden", d: "Tag 3 und 7", items: [
+        ["Strasse", `Rv3 durch das Østerdalen bis Tynset, über Os nach Røros und auf Rv31/Rv84 über die Grenze. Røros – Funäsdalen gilt als flache, wenig kurvige Hauptverbindung (${L("Bestbikingroads", "https://previews.bestbikingroads.com/motorcycle-roads/norway/nordland-nord-trondelag/ride/rv31-84-roros-sveg")}). Höhe am Grenzübergang nicht verifiziert – Fjell-Bedingungen einplanen.`],
+        ["Røros", `Bergbaustadt mit Holzhäusern, UNESCO-Welterbe. 1 h Rundgang, Vorräte einkaufen. Rückfahrt am Sonntag: Läden zu – am Samstag in Funäsdalen einkaufen. Ausweichplatz: ${L("Røros Camping Håneset", "https://www.campercontact.com/en/md/66491")}, ca. 350 NOK.`],
+        ["Zoll", `Norwegen ist nicht in der EU. Bei Wiedereinreise am 1.11. gelten Freimengen, vor allem Alkohol (${L("toll.no", "https://www.toll.no")}).`],
+        ["Zeit", "Schweden hat dieselbe Uhrzeit wie Norwegen."],
+      ]},
+      { t: "Härjedalen: Funäsdalen", d: "Tag 3–6", items: [
+        ["Standplatz", `${L("Funäsdalens Fjällcamping", P4N(427158))} in Ljusnedal am Fluss Ljusnan, 2–3 km östlich vom Ortskern; 2023 eröffnet, ganzjährig, 450 SEK inkl. Strom, Dusche, Sauna (14–22 Uhr), park4night 4,1/5. Viele Dauercamper. Fjällnäs am Malmagen nur Mai–Oktober (Tel. +46 70 550 86 05).`],
+        ["Funäsdalsberget ab Platz", `Zu Fuss in den Ort (2–3 km), über die Skiliftstation auf den Funäsdalsberget (977 m): 5,6 km, 320 Hm, ca. 2 h (${L("Komoot", KOMOOT(37293179))}). Lang: 13 km, 490 Hm, ca. 4:10 h (${L("Komoot", KOMOOT(10983530))}). Kurz ab Kirche: 4,1 km, 290 Hm, ca. 1:35 h (${L("Komoot", KOMOOT(31105142))}). Jeweils plus Zugang ab Platz.`],
+        ["Hamrafjället – die Ausnahme", `Gipfelrunde ab Parkplatz an der Strasse 84 bei Tänndalen, 12,6 km, 400 Hm, ca. 3:50 h, mittel (${L("Komoot", KOMOOT(10983498))}). Ca. 20 min Anfahrt – bricht die Regel «an Ruhetagen nicht fahren», lohnt sich nur bei klarem, ruhigem Wetter. Oben Schnee: Grödel, Start spätestens 09:00, Umkehr spätestens 13:30.`],
+        ["Reservat Hamrafjället", `Campen und offenes Feuer verboten, Rentierzucht beachten (${L("Naturkartan", "https://www.naturkartan.se/sv/jamtlands-lan/hamrafjallet")}).`],
+        ["Leichte Touren bei Tänndalen", `Andersjöfallet ab Hamra 5,2 km, Andersborg-Runde ab Tänndalen 3–7 km (${L("Komoot-Guide", "https://www.komoot.com/guide/3623719/easy-hikes-around-hamrafjaellet")}) – nur zusammen mit der Hamrafjället-Fahrt.`],
+        ["Angeln", "Für Seen braucht es ein Fiskekort, meist online über iFiske; Saison und Schonzeiten vor Ort prüfen. Kein Meeresangeln."],
+        ["Nordlicht", "62,5° N, offenes Fjell, wenig Licht – die beste Lage der drei Varianten. Zu Fuss aus dem Lichtkreis von Platz und Ort hinaus, Blick nach Norden."],
+        ["Tageslicht", "Sonnenaufgang ca. 07:35, Sonnenuntergang ca. 16:10 – rund eine halbe Stunde kürzer als in Valdres."],
+        ["Gas", "OKQ8 in Funäsdalen (Rörosvägen 47, täglich bis 21 Uhr) – ob dort Gasol getauscht und norwegische Flaschen angenommen werden, ist offen."],
+      ]},
+    ],
+    hikes: [
+      { day: "Tag 2", n: "Trabelifjellet-Sattel", start: "Trabelia, ab Platz", km: "7,5", hm: "220", time: "ca. 2:15 h", lvl: "mittel", u: KOMOOT(34343252) },
+      { day: "Tag 3", n: "Rundgang Røros (UNESCO)", start: "Røros (Fahrtag)", time: "ca. 1 h", lvl: "leicht" },
+      { day: "Tag 4", n: "Funäsdalsberget-Gipfelrunde (977 m)", start: "Funäsdalen, plus 2–3 km Zugang ab Platz", km: "5,6", hm: "320", time: "ca. 2 h", lvl: "mittel", u: KOMOOT(37293179) },
+      { day: "Tag 5", n: "Hamrafjället-Gipfelrunde", start: "Parkplatz an der Strasse 84 bei Tänndalen (20 min Anfahrt)", km: "12,6", hm: "400", time: "ca. 3:50 h", lvl: "mittel", u: KOMOOT(10983498) },
+      { day: "Tag 5 · Alt.", n: "Lange Funäsdalsberget-Runde", start: "Funäsdalen, plus Zugang ab Platz", km: "13", hm: "490", time: "ca. 4:10 h", lvl: "schwer", u: KOMOOT(10983530) },
+      { day: "Tag 5 · Extra", n: "Andersjöfallet / Andersborg-Runde", start: "Hamra bzw. Tänndalen (mit Hamrafjället-Fahrt)", km: "3–7", time: "1–2 h", lvl: "leicht", u: "https://www.komoot.com/guide/3623719/easy-hikes-around-hamrafjaellet" },
+      { day: "Tag 6", n: "Kurze Runde ab Kirche Funäsdalen", start: "Kirche Funäsdalen", km: "4,1", hm: "290", time: "ca. 1:35 h", lvl: "leicht", u: KOMOOT(31105142) },
+      { day: "Tag 8", n: "Gulltjønnet-Runde", start: "Wanderparkplatz Venabygdsfjellet (2 km zu Fuss)", km: "9,9", hm: "160", time: "ca. 2:45 h", lvl: "leicht", u: KOMOOT(31076699) },
+    ],
+    aurora: "Funäsdalen auf 62,5° N ist die beste Lage der drei Varianten; die zweite Rondane-Phase (1.–2.11.) hat abnehmenden Mond.",
+    daylight: [["Venabygd", "27.10.", "ca. 07:45", "ca. 16:40"], ["Funäsdalen", "29.10.", "07:35", "16:10"]],
+    suggestions: ["Ist Tag 3 nach Funäsdalen solo zu lang?", "Was muss ich am Zoll beachten?", "Lohnt sich Hamrafjället Ende Oktober?", "Wie sichere ich die Gasversorgung bis Schweden?"],
+  },
+};
+
+/* Checkliste: v = Varianten, für die der Punkt gilt */
+const TODOS = [
+  { id: "len", t: "Länge und Höhe des Motorhomes notieren (Fährbuchung, Plätze mit Längenlimit)", done: true },
+  { id: "ferry", t: "Color Line gebucht: Kiel – Oslo So 25.10. und Oslo – Kiel Mi 4.11.", done: true },
+  { id: "epass", t: "Fahrzeug bei Epass24 registriert – sonst gilt über 3,5 t der Lkw-Tarif", done: true },
+  { id: "laerdal", t: "Lærdal Ferie- og Fritidspark anrufen (+47 57 66 66 95): offen 30.10.–1.11.?", v: "AB" },
+  { id: "tyres", t: "Winterreifen (3PMSF) mit gutem Profil; zwei Ketten Probe montieren; Gesamtgewicht bis 7,5 t bestätigen" },
+  { id: "gear", t: "Zwei volle Gasflaschen, Spikes (Grödel), Stirnlampe, Nordlicht-App" },
+  { id: "fishbiz", t: "Entscheiden, ob ein Angeltag über einen registrierten Betrieb gebucht wird (nötig, falls Fisch mit nach Hause soll)", v: "AB" },
+  { id: "colorgas", t: "Color Line schriftlich fragen: Wohnmobil über 3,5 t mit fester Gasanlage und zwei Flaschen erlaubt? Antwort ausdrucken" },
+  { id: "agahot", t: "AGA-Hotline (+47 45 50 36 34): wird meine Flasche an norwegischen Automaten getauscht?" },
+  { id: "freiburg", t: "Stellplatz Freiburg anrufen: Freitagnacht trotz SC-Heimspiel am So 25.10. möglich? Sonst Kenzingen" },
+  { id: "trabelia", t: "Trabelia anrufen: Platz 26.–28.10. (B, C) und 1.–3.11. (C), Länge, Strompreis; Ausweich Lundecamp", v: "BC" },
+  { id: "fagernes", t: "Fagernes Camping: bei gestrichenem Lærdal drei Nächte 28.–31.10. anfragen", v: "B" },
+  { id: "funas", t: "Funäsdalens Fjällcamping: Platz 28.10.–1.11. bestätigen, Länge, Strom (CEE/Schuko – Adapter)", v: "C" },
+  { id: "zoll", t: "Zollfreimengen Norwegen für die Wiedereinreise prüfen (toll.no)", v: "C" },
+  { id: "fiskekort", t: "Fiskekort Funäsdalsfjällen anschauen (iFiske)", v: "C" },
+  { id: "offline", t: "Komoot-Touren offline verfügbar machen (Region freischalten)" },
+  { id: "plan", t: "Route und Tagesplan jemandem zu Hause schicken" },
+];
+
+const DECIDE = [
+  { k: "A", w: "Odda und Hardanger höchstens einzelne Regentage; Haukelifjell ohne Sturm- oder Schneewarnung." },
+  { k: "B", w: "Westen nass oder Warnung für Vestland/Haukelifjell – und Fjordangeln ist dir wichtig." },
+  { k: "C", w: "Westen nass oder Warnung – und Nordlicht und Ruhe haben Vorrang; dazu für Härjedalen mehrere klare Nächte und keine Sturmwarnung." },
+  { k: "B", w: "Unklar oder gemischt: Variante B ist die sicherste Wahl, Lærdal bleibt drin." },
+];
+
+/* Allgemeine Infos (gelten für alle Varianten) */
+const INFO = {
+  decideChecks: [
+    `Wetter Odda und Haukeliseter auf ${L("yr.no", "https://www.yr.no")}, Wolken und Niederschlag für 5 Tage`,
+    `Für C: Wolken Funäsdalen auf ${L("yr.no", "https://www.yr.no")} bzw. ${L("smhi.se", "https://www.smhi.se")} und Nordlicht-Prognose`,
+    `Wetterwarnungen (farevarsel) auf yr.no bzw. ${L("varsom.no", "https://www.varsom.no")}`,
+    `Strassenstatus E134 Haukelifjell auf ${L("vegvesen.no/trafikk", "https://www.vegvesen.no/trafikk")}`,
+    "Für A und B: Antwort von Lærdal berücksichtigen; für B und C: Trabelia anrufen und Platz bestätigen",
+  ],
+  passes: [
+    ["E134 Haukelifjell", "1085 m", "Kolonnenfahrt, kurze Sperrungen", "Einen Tag warten, Ruhetage tauschen", "A"],
+    ["Rv37 Rjukan – Rauland", "ca. 900 m", "Schnee, Glätte", "Früh fahren, Status prüfen", "A"],
+    ["E16 Filefjell", "ca. 1000 m", "Kolonnenfahrt bei Sturm", "Abfahrt verschieben", "AB"],
+    ["Fv51 Valdresflye", "1389 m", "kann jederzeit wintergesperrt werden", "nur Ausflug, nicht Teil der Route", "AB"],
+    ["Rv3 / Rv31 / Rv84 nach Røros und Schweden", "nicht verifiziert", "Fjell-Bedingungen", "In Røros übernachten", "C"],
+  ],
+  vehicle: [
+    ["Schneeketten", `Wohnmobile 3,5–7,5 t sind von der Drei-Ketten-Pflicht ausgenommen (${L("Statens vegvesen", "https://www.vegvesen.no/kjoretoy/yrkestransport/dekk-og-kjetting/kjettinger-tungbil/")}). Zwei Ketten für die Antriebsachse reichen. Bei Zwillingsbereifung prüfen; vor der Reise Probe montieren.`],
+    ["Reifen", "Winterreifenpflicht für schwere Fahrzeuge gilt nicht bis 7,5 t, Bereifung muss aber passen. Ab 1. November mind. 3 mm Profil. Empfehlung: 3PMSF rundum."],
+    ["Tempo", "Ausserorts max. 80 km/h, auch auf Autobahnen. Fahrzeiten rechnen mit 65–70 km/h Schnitt."],
+    ["Maut", "Kein AutoPASS-Gerät nötig. Ohne Registrierung Lkw-Tarif (200 %), mit Epass24 Pkw-Tarif."],
+    ["Schmale Strassen", "Schilder für Gesamtgewicht und Länge beachten; bei Glätte keine Abstecher auf enge Bergstrassen."],
+    ["Gas", "Mit vollen Flaschen starten; bei Dauerheizen um 0 °C Verbrauch nach zwei Nächten prüfen. Gas während der Fähre abdrehen, Gaskasten unverschlossen lassen."],
+    ["Frostschutz", "Abwasser und Frischwasserleitungen nachts gegen Frost sichern; Strom auf den Plätzen hilft beim Heizen."],
+  ],
+  gasRules: {
+    A: "Bei unter halbvoller Flasche tauschen: Notodden (Tag 1) und Fagernes (Tag 7 und 9).",
+    B: "Bei unter halbvoller Flasche tauschen: Øyer/Lillehammer (Tag 1 und 3) und Fagernes (am Standort).",
+    C: "Øyer/Lillehammer vor Rondane – bis Schweden und zurück gibt es keinen sicheren AGA-Automaten. Notlösung LPG Røros (füllt ausländische Flaschen).",
+  },
+  gasNotes: [
+    "Norwegische Automaten tauschen sicher norwegische AGA-Flaschen. Ob eine schwedische AGA-Gasolflasche angenommen wird, vorab bei der Hotline (+47 45 50 36 34) klären.",
+    "Ein Nutzer berichtet, dass ein Automat (Kjeller) nur noch Composite-Flaschen ausgibt. Prüfen, ob eine Composite-Flasche in den Gaskasten passt; Aufpreis möglich.",
+    `Color Line nennt 2,5 kg pro Flasche als Grenze – schriftlich klären, ob das für Flaschen im Gaskasten gilt (${L("Color Line", "https://www.colorline.com/practical-information/safety-on-board")}).`,
+  ],
+  solo: [
+    "Route und Tagesplan jemandem zu Hause schicken; bei Wanderungen melden, wann du zurück bist.",
+    "Offline-Karten (UT.no, Norgeskart, Komoot) laden; nicht überall Netz.",
+    "Stirnlampe, Spikes, Wechselkleidung und warmes Getränk bei jeder Wanderung; Umkehrzeit spätestens 2 h vor Sonnenuntergang.",
+    "Wanderungen spätestens um 10 Uhr starten, Fahrten so legen, dass du vor 16 Uhr am Platz bist.",
+    "Faustregel Pässe: am Vormittag, nie bei Sturmwarnung, nie in die Dunkelheit hinein. Verkehrsinfo Telefon 175.",
+  ],
+  fishing: [
+    ["Meer und Fjord", `Ohne Lizenz und kostenlos, nur mit Rute. Mindestmasse einhalten, mehr als 100 m Abstand zu Fischfarmen (${L("Fiskeridirektoratet", "https://www.fiskeridir.no/English/sea-angling-in-norway/regulations")}). Im Herbst vor allem Dorsch, Köhler und Pollack vom Ufer.`],
+    ["Fisch mitnehmen", `Nur wer über einen registrierten Angelbetrieb angelt, darf Meeresfisch ausführen – 2026 max. 15 kg pro Person (${L("Fiskeridirektoratet", "https://www.fiskeridir.no/English/Fishing-in-Norway/Export-quota")}). Sonst vor Ort essen.`],
+    ["Seen und Flüsse", `Angelkarte nötig, meist über ${L("inatur.no", "https://www.inatur.no")} (Schweden: iFiske). Schonzeiten prüfen; Ausrüstung aus dem Ausland vorher desinfizieren.`],
+  ],
+  aurora: [
+    ["Realistisch", "In Südnorwegen (60–61° N) möglich, aber kein Selbstläufer: ein bis zwei gute Chancen. Die Kamera sieht mehr als das Auge – schwaches Nordlicht wirkt grau-weisslich wie eine Wolke."],
+    ["Sonnenzyklus", "Maximum lag im Oktober 2024; 2026 ist die abklingende Phase. Starke Ereignisse bleiben möglich."],
+    ["Abendroutine", "Um ca. 20 Uhr Kp, Bz und Wolken prüfen (SpaceWeatherLive oder My Aurora Forecast, Wolken auf yr.no). Wenn es passt: Kleidung und Kamera bereit, Alarm aktiv."],
+    ["Uhrzeit", "Dunkel ab ca. 18:30. Hauptfenster ca. 21–1 Uhr; Aktivität kommt in Schüben von 10–30 min – nicht nach dem ersten ruhigen Bogen aufgeben."],
+    ["Augen", "15–20 min an die Dunkelheit gewöhnen, Stirnlampe auf Rotlicht. Testfoto im Handy-Nachtmodus zeigt, ob eine «Wolke» grün ist."],
+  ],
+  kp: [["Kp-Index (0–9)", "Stärke der Magnetfeldstörung, 3-h-Mittel", "ab Kp 4 tief im Norden, ab 5–6 höher"], ["Bz (nT)", "Ausrichtung Magnetfeld im Sonnenwind", "länger als 30 min bei −5 oder tiefer"], ["Sonnenwind", "Wucht der Teilchen", "über 500 km/s"], ["Bewölkung", "entscheidet am Ende alles", "klare Lücke Richtung Norden"]],
+  camera: [
+    ["Grundeinstellung A7C", "M, RAW, MF. SteadyShot aus (Stativ), Langzeit-Rauschminderung aus. Weissabgleich fix 3500–4000 K. 2-s-Selbstauslöser. Display dunkel."],
+    ["Scharfstellen", "Hellen Stern anvisieren, Fokuslupe maximal, drehen bis der Punkt am kleinsten ist. Fokusring mit Klebeband sichern; nach Aus/Ein prüfen."],
+    ["Startwerte", "14–24 mm f/1.4–2: 3–8 s (aktiv) bzw. 10–15 s, ISO 1600–3200 · 16–35 mm f/4: 8–15 s, ISO 3200–6400 · Kit 28–60 mm: 28 mm f/4, 8–12 s, ISO 6400 · 35–85 mm offen: 2–5 s, ISO 3200."],
+    ["Faustregeln", "Max. Belichtung ca. 300 ÷ Brennweite (20 s bei 14 mm). Aktives Nordlicht kurz belichten. Histogramm statt Display; Grün nicht ausbrennen."],
+    ["Kälte", "2–3 Ersatzakkus (NP-FZ100) warm in der Innentasche. USB-Heizband gegen Tau. Kamera vor dem Reingehen in einen verschlossenen Beutel, erst nach 1 h öffnen."],
+  ],
+};
+
+/* =========================================================
+   HILFSFUNKTIONEN
+   ========================================================= */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("nst:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("nst:" + k, JSON.stringify(v)); } catch {} },
+};
+const ICON = {
+  back: '<path d="M15 18l-6-6 6-6"/>',
+  plan: '<path d="M8 2v4M16 2v4M3 9h18"/><rect x="3" y="4" width="18" height="18" rx="2"/>',
+  pin: '<path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+  boot: '<path d="M4 20l6-14 4 7 2-3 4 10z"/>',
+  near: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  chat: '<path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/>',
+  car: '<path d="M3 13l2-5h14l2 5v5h-3M3 13v5h3M3 13h18"/><circle cx="7.5" cy="18" r="1.8"/><circle cx="16.5" cy="18" r="1.8"/>',
+  bed: '<path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/>',
+  map: '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>',
+  ext: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/>',
+  send: '<path d="M4 12l16-8-6 16-2.5-6.5z"/>',
+  gas: '<rect x="7" y="6" width="10" height="15" rx="4"/><path d="M10 3h4v3h-4z"/>',
+  dump: '<path d="M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z"/>',
+  camp: '<path d="M3 20L12 5l9 15zM12 5v15M9 20l3-5 3 5"/>',
+  ferry: '<path d="M3 17l2 3h14l2-3zM6 17V11h12v6M9 11V7h6v4"/>',
+  shop: '<path d="M4 7h16l-1.5 9h-13zM9 7V5a3 3 0 016 0v2"/>',
+  wc: '<path d="M7 4v16M17 4v16M4 9h6M14 9h6"/>',
+  fuel: '<path d="M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M3 21h14M15 9h2a2 2 0 012 2v6a1.5 1.5 0 003 0V8l-3-3"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+};
+const svg = (n, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[n]}</svg>`;
+
+function nightsBar(r) {
+  const total = r.nights.reduce((s, n) => s + n[1], 0);
+  const op = [100, 70, 48, 32, 20];
+  const seen = {};
+  let idx = 0;
+  const bars = [], legend = [];
+  r.nights.forEach(([name, n]) => {
+    if (!(name in seen)) { seen[name] = op[idx++ % op.length]; legend.push(`<span style="--o:${seen[name]}">${esc(name)}</span>`); }
+    for (let i = 0; i < n; i++) bars.push(`<i style="--o:${seen[name]}" title="${esc(name)}"></i>`);
+  });
+  return `<div class="stack" style="gap:6px"><div class="nights" aria-label="${total} Nächte: ${esc(r.nights.map(n => n[0] + " " + n[1]).join(", "))}">${bars.join("")}</div><div class="nights-legend">${legend.join("")}</div></div>`;
+}
+
+const today = () => new Date();
+const isoToday = () => { const d = today(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+function allDays(r) { return [...ANREISE.map(d => ({ ...d, phase: "an" })), ...r.days.map((d, i) => ({ ...d, n: i + 1, phase: "route" })), ...RUECKREISE.map(d => ({ ...d, phase: "rueck" }))]; }
+
+function haversine(a, b) {
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const fmtKm = km => km < 1 ? Math.round(km * 1000) + " m" : km < 20 ? km.toFixed(1).replace(".", ",") + " km" : Math.round(km) + " km";
+const plain = html => html.replace(/<a [^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g, "$2 [$1]").replace(/<[^>]+>/g, "");
+
+/* =========================================================
+   STATE + ROUTING (#a, #a-chat …)
+   ========================================================= */
+const TABS = [
+  { id: "plan", label: "Plan", icon: "plan" },
+  { id: "orte", label: "Orte", icon: "pin" },
+  { id: "touren", label: "Touren", icon: "boot" },
+  { id: "naehe", label: "Nähe", icon: "near" },
+  { id: "infos", label: "Infos", icon: "info" },
+  { id: "chat", label: "Chat", icon: "chat" },
+];
+let state = { route: null, tab: "plan" };
+
+function readHash() {
+  const h = location.hash.replace("#", "").toLowerCase();
+  const [r, t] = h.split("-");
+  const key = r ? r.toUpperCase() : null;
+  state.route = ROUTES[key] ? key : null;
+  state.tab = TABS.some(x => x.id === t) ? t : "plan";
+}
+function go(route, tab = "plan") {
+  const h = route ? (tab === "plan" ? route.toLowerCase() : route.toLowerCase() + "-" + tab) : "";
+  if (("#" + h) !== location.hash && !(h === "" && location.hash === "")) {
+    history.pushState(null, "", h ? "#" + h : location.pathname + location.search);
+  }
+  readHash(); render(); window.scrollTo(0, 0);
+}
+window.addEventListener("popstate", () => { readHash(); render(); });
+
+/* =========================================================
+   STARTSEITE
+   ========================================================= */
+function countdown() {
+  const now = today();
+  const day = 864e5;
+  if (now < TRIP.start) {
+    const d = Math.ceil((TRIP.start - now) / day);
+    return { big: d, small: d === 1 ? "Tag bis Abfahrt" : "Tage bis Abfahrt" };
+  }
+  if (now <= TRIP.end) {
+    const d = Math.floor((now - new Date("2026-10-23T00:00:00+02:00")) / day) + 1;
+    return { big: d, small: "Reisetag von 15" };
+  }
+  return { big: "✓", small: "Reise zurück" };
+}
+
+function renderStart() {
+  document.documentElement.style.setProperty("--route", "var(--c)");
+  document.body.classList.remove("chat-open");
+  const cd = countdown();
+  const chosen = store.get("chosen", null);
+  return `
+  <header class="hero"><div class="wrap">
+    <span class="label">Motorhome · solo · 23.10.–6.11.2026</span>
+    <h1>Südnorwegen<br>Solotour</h1>
+    <p class="sub">Gleiche Anreise und Rückreise, drei Varianten für die neun Nächte dazwischen. Entschieden wird am Montag, 26.10., bei Ankunft in Oslo – nach der Wetterprognose.</p>
+    <div class="stats">
+      <div class="stat"><b>${cd.big}</b><span>${cd.small}</span></div>
+      <div class="stat"><b>9</b><span>Nächte NO / SE</span></div>
+      <div class="stat"><b>2</b><span>Fähren gebucht</span></div>
+    </div>
+    <svg class="ridge" viewBox="0 0 400 46" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 40 L40 30 L70 36 L110 14 L140 28 L170 20 L205 34 L240 10 L270 24 L300 18 L335 32 L370 22 L400 30"/>
+      <path class="hi" d="M0 44 L30 38 L60 42 L95 26 L130 38 L160 32 L200 42 L235 24 L265 36 L300 30 L340 40 L375 34 L400 40"/>
+    </svg>
+  </div></header>
+
+  <main class="wrap">
+    <div class="section-title"><h2>Route wählen</h2><span class="label">3 Varianten</span></div>
+    <div class="routes">
+      ${Object.values(ROUTES).map(r => `
+      <button class="rcard" style="--route:${r.color}" data-go="${r.key}" aria-label="Variante ${r.key}: ${esc(r.name)} öffnen">
+        <div class="top">
+          <span class="badge">${r.key}</span>
+          <div style="min-width:0"><h3>${esc(r.name)}${chosen === r.key ? ' <span class="chip" style="margin-left:6px;vertical-align:middle">gewählt</span>' : ""}</h3><div class="sub">${esc(r.title)}</div></div>
+          <span class="go" aria-hidden="true">→</span>
+        </div>
+        ${nightsBar(r)}
+        <div class="facts">
+          <div><span class="label">Schwerpunkt</span>${esc(r.tagline)}</div>
+          <div><span class="label">Fahr- / Ruhetage</span><span class="mono">${r.drive}</span></div>
+          <div><span class="label">Längste Etappe</span>${esc(r.longest)}</div>
+          <div><span class="label">Angeln</span>${esc(r.angeln)}</div>
+          <div style="grid-column:1/-1"><span class="label">Hauptrisiko</span>${esc(r.risk)}</div>
+        </div>
+      </button>`).join("")}
+    </div>
+
+    <div class="section-title"><h2>Entscheidung am Mo 26.10.</h2><span class="label">Oslo, 10:00</span></div>
+    <p class="muted" style="margin-bottom:12px">Bei Ankunft der Fähre die Prognose für 27.–31.10. prüfen und in 15 Minuten entscheiden. Reservieren musst du in keiner Variante.</p>
+    <div class="decide">
+      ${DECIDE.map(o => `<div class="opt" style="--route:${ROUTES[o.k].color}"><span class="chip">${o.k} · ${esc(ROUTES[o.k].name.split(" ")[0])}</span><span>${esc(o.w)}</span></div>`).join("")}
+    </div>
+    <p class="foot">Planung Stand 14.10.2026 · Distanzen Google Maps, für das Motorhome rund 20 % plus Pausen aufgeschlagen. Daten dieser App (Checkliste, Chat) bleiben nur in diesem Browser.</p>
+  </main>`;
+}
+
+/* =========================================================
+   DETAILSEITE
+   ========================================================= */
+function dayCard(d, r, label) {
+  const isToday = d.iso === isoToday();
+  const drive = !!d.km && !d.rest;
+  return `<div class="day ${drive ? "drive" : ""} ${isToday ? "today" : ""}">
+    <div class="dnum"><small>${esc(label[0])}</small><b>${esc(label[1])}</b></div>
+    <div class="dcard">
+      <div class="row" style="justify-content:space-between"><span class="label">${esc(d.date)}${isToday ? " · heute" : ""}</span>
+        <div class="meta">${d.rest ? '<span class="pill rest">Ruhetag</span>' : ""}${d.km ? `<span class="pill drv">${esc(d.km)}</span><span class="pill">${esc(d.h)}</span>` : ""}${d.start ? `<span class="pill">ab ${esc(d.start)}</span>` : ""}</div>
+      </div>
+      <h3>${esc(d.title)}</h3>
+      ${d.hike ? `<div class="line">${svg("boot")}<span>${esc(d.hike)}</span></div>` : ""}
+      <div class="line">${svg("bed")}<span>${d.stay}</span></div>
+      ${d.note ? `<div class="line">${svg("info")}<span class="muted">${esc(d.note)}</span></div>` : ""}
+      ${d.map ? `<div><a class="btn" href="${d.map}" target="_blank" rel="noopener">${svg("map")}Route in Google Maps</a></div>` : ""}
+    </div>
+  </div>`;
+}
+
+function tabPlan(r) {
+  const openAn = isoToday() >= "2026-10-23" && isoToday() <= "2026-10-25";
+  const openRueck = isoToday() >= "2026-11-04";
+  return `
+  <p class="lead">${esc(r.intro)}</p>
+  <div class="maps" style="margin-top:12px">${r.maps.map(m => `<a class="btn primary" href="${m[1]}" target="_blank" rel="noopener">${svg("map")}${esc(m[0])}</a>`).join("")}</div>
+  <div style="margin-top:16px"><details class="fold" ${openAn ? "open" : ""}><summary>${svg("car", 'style="width:18px;height:18px;color:var(--route)"')} Anreise · Fr 23. – So 25.10.</summary>
+    <div class="body"><div class="daylist">${ANREISE.map(d => dayCard(d, r, [d.date.slice(0, 2), d.date.slice(3, 5)])).join("")}</div>
+    <div class="note">Puffer Sonntag: rund 1,5 h bis zum Check-in. Wenn der Samstag stockt, früher anhalten und sonntags um 06:30 starten. Freiburg: SC-Heimspiel am So 25.10. – vorher anrufen, Fallback Wohnmobilpark Kenzingen an der A5.</div></div>
+  </details></div>
+  <div class="group-title"><span class="label">Variante ${r.key} · 9 Nächte</span></div>
+  <div class="daylist">${r.days.map((d, i) => dayCard(d, r, ["Tag", String(i + 1)])).join("")}
+    ${dayCard({ ...RUECKREISE[0], date: "Mi 4.11." }, r, ["Tag", "10"])}
+  </div>
+  <details class="fold" ${openRueck ? "open" : ""}><summary>${svg("car", 'style="width:18px;height:18px;color:var(--route)"')} Rückreise · Do 5. – Fr 6.11.</summary>
+    <div class="body"><div class="daylist">${RUECKREISE.slice(1).map(d => dayCard(d, r, [d.date.slice(0, 2), d.date.slice(3, 4)])).join("")}</div>
+    <div class="note">Letzte Nacht in Norwegen in allen Varianten in Oslo (Bogstad). Selbst gefangener Meeresfisch darf nur mit, wenn er über einen registrierten Angelbetrieb gefangen wurde. Samstag, 7.11., ist frei – Puffer für einen kürzeren Donnerstag.</div></div>
+  </details>`;
+}
+
+function tabOrte(r) {
+  return `<div class="stack">${r.places.map(p => `
+    <section class="place"><header><span class="label">${esc(p.d)}</span><h2>${esc(p.t)}</h2></header>
+      <ul class="facts-list">${p.items.map(([k, v]) => `<li><b>${esc(k)}</b><span>${v}</span></li>`).join("")}</ul>
+    </section>`).join("")}</div>`;
+}
+
+function tabTouren(r) {
+  return `<p class="lead">Zeiten sind Komoot-Sommerwerte; bei Schnee, Nässe und kurzen Tagen 30–50 % mehr einplanen. Alle Komoot-Touren sind in deinem Konto unter «Geplant» gespeichert – vor der Reise offline verfügbar machen.</p>
+  <div class="stack" style="margin-top:14px">${r.hikes.map(h => `
+    <article class="hike">
+      <div class="hd"><div><span class="label">${esc(h.day)}</span><h3>${esc(h.n)}</h3></div><span class="pill lvl-${h.lvl}">${esc(h.lvl)}</span></div>
+      <div class="nums">${h.km ? `<span class="pill">${esc(h.km)} km</span>` : ""}${h.hm ? `<span class="pill">${esc(h.hm)} Hm</span>` : ""}<span class="pill">${esc(h.time)}</span></div>
+      <div class="line muted small" style="display:flex;gap:6px">${svg("pin", 'style="width:15px;height:15px;flex:none;margin-top:3px"')}<span>${esc(h.start)}</span></div>
+      ${h.u ? `<div><a class="btn" href="${h.u}" target="_blank" rel="noopener">${svg("ext")}Karte & Höhenprofil</a></div>` : ""}
+    </article>`).join("")}</div>`;
+}
+
+function tabInfos(r) {
+  const todos = TODOS.filter(t => !t.v || t.v.includes(r.key));
+  const checked = store.get("todos", Object.fromEntries(TODOS.filter(t => t.done).map(t => [t.id, true])));
+  const done = todos.filter(t => checked[t.id]).length;
+  const gas = Object.entries(POI).filter(([, p]) => p.t === "gas" && (!p.v || p.v.includes(r.key)));
+  const passes = INFO.passes.filter(p => p[4].includes(r.key));
+  const fold = (title, body, open = false) => `<details class="fold" ${open ? "open" : ""}><summary>${title}</summary><div class="body">${body}</div></details>`;
+  const kv = arr => `<ul class="facts-list">${arr.map(([k, v]) => `<li><b>${esc(k)}</b><span>${v}</span></li>`).join("")}</ul>`;
+  return `<div class="stack">
+    ${fold(`Checkliste <span class="chip mono">${done}/${todos.length}</span>`, `
+      <div class="progress"><i style="width:${Math.round(done / todos.length * 100)}%"></i></div>
+      <div>${todos.map(t => `<label class="check"><input type="checkbox" id="todo-${t.id}" data-todo="${t.id}" ${checked[t.id] ? "checked" : ""}><span>${esc(t.t)}${t.v ? ` <span class="muted small">(${t.v.split("").join(", ")})</span>` : ""}</span></label>`).join("")}</div>`, true)}
+    ${fold("Entscheidung in Oslo – was prüfen", `<ul class="facts-list">${INFO.decideChecks.map(c => `<li><span>${c}</span></li>`).join("")}</ul>`)}
+    ${fold("Gas: AGA-Tausch unterwegs", `
+      <div class="note">${esc(INFO.gasRules[r.key])}</div>
+      <p class="small muted">AGA-Propanautomaten: rund um die Uhr, ohne Personal. An den Standorten selbst gibt es keinen Automaten – auf der Durchfahrt tauschen. Kurz vor der Reise im ${L("AGA-Verzeichnis", "https://my.aga.no/finn-din-naermeste-forhandler/propanautomat/")} prüfen.</p>
+      <div class="tablewrap"><table><thead><tr><th>Ort</th><th>Art</th></tr></thead><tbody>
+      ${gas.map(([, p]) => `<tr><td>${L(esc(p.n), p.u)}</td><td>${esc(p.d)}</td></tr>`).join("")}</tbody></table></div>
+      ${INFO.gasNotes.map(n => `<p class="small">${n}</p>`).join("")}`)}
+    ${fold("Strassen und Pässe", `
+      <div class="tablewrap"><table><thead><tr><th>Abschnitt</th><th>Höhe</th><th>Risiko</th><th>Plan B</th></tr></thead><tbody>
+      ${passes.map(p => `<tr><td>${esc(p[0])}</td><td class="num">${esc(p[1])}</td><td>${esc(p[2])}</td><td>${esc(p[3])}</td></tr>`).join("")}</tbody></table></div>
+      <p class="small">Status: ${L("vegvesen.no/trafikk", "https://www.vegvesen.no/trafikk")} oder Telefon 175. Wetter ${L("yr.no", "https://www.yr.no")}, Lawinen ${L("varsom.no", "https://www.varsom.no")}. Sognefjellet (Fv55) und Valdresflye (Fv51) werden über den Winter gesperrt.</p>`)}
+    ${fold("Motorhome über 3,5 t", kv(INFO.vehicle))}
+    ${fold("Nordlicht", `<div class="note">${esc(r.aurora)}</div>${kv(INFO.aurora)}
+      <div class="tablewrap"><table><thead><tr><th>Kennzahl</th><th>Bedeutung</th><th>Günstig</th></tr></thead><tbody>${INFO.kp.map(k => `<tr><td>${esc(k[0])}</td><td>${esc(k[1])}</td><td>${esc(k[2])}</td></tr>`).join("")}</tbody></table></div>`)}
+    ${fold("Fototipps Sony A7C", kv(INFO.camera))}
+    ${fold("Angeln", kv(INFO.fishing))}
+    ${fold("Tageslicht", `<div class="tablewrap"><table><thead><tr><th>Ort</th><th>Datum</th><th>Aufgang</th><th>Untergang</th></tr></thead><tbody>
+      ${r.daylight.map(d => `<tr><td>${esc(d[0])}</td><td class="num">${esc(d[1])}</td><td class="num">${esc(d[2])}</td><td class="num">${esc(d[3])}</td></tr>`).join("")}</tbody></table></div>
+      <p class="small muted">Rund 9 h Licht Ende Oktober, gut 8,5 h Anfang November. Werte berechnet, auf die Minute ungenau.</p>`)}
+    ${fold("Solo unterwegs & Notruf", `<div class="row"><span class="chip mono">112 Polizei</span><span class="chip mono">113 Ambulanz</span><span class="chip mono">110 Feuerwehr</span><span class="chip mono">175 Verkehr</span></div>
+      <ul class="facts-list">${INFO.solo.map(s => `<li><span>${esc(s)}</span></li>`).join("")}</ul>`)}
+  </div>`;
+}
+
+/* ---------- Nähe (Standort) ---------- */
+let geo = { watch: null, pos: null, err: null, filter: "alle" };
+function geoAvailable() { return "geolocation" in navigator; }
+function startGeo() {
+  if (!geoAvailable()) { geo.err = "Dieser Browser liefert keinen Standort."; rerenderTab(); return; }
+  geo.err = null;
+  try {
+    geo.watch = navigator.geolocation.watchPosition(p => {
+      geo.pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
+      store.set("lastpos", geo.pos);
+      if (state.tab === "naehe") rerenderTab();
+    }, e => {
+      geo.err = e.code === 1 ? "Standortfreigabe abgelehnt oder hier gesperrt. In den Browser-Einstellungen für diese Seite erlauben." : "Standort gerade nicht verfügbar (kein GPS-Signal?).";
+      stopGeo(false); rerenderTab();
+    }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 30000 });
+    store.set("geoOn", true);
+  } catch { geo.err = "Standort ist in dieser Ansicht gesperrt."; }
+  rerenderTab();
+}
+function stopGeo(remember = true) {
+  if (geo.watch != null) { try { navigator.geolocation.clearWatch(geo.watch); } catch {} }
+  geo.watch = null;
+  if (remember) store.set("geoOn", false);
+}
+function currentDay(r) {
+  const days = allDays(r);
+  const t = isoToday();
+  if (t < days[0].iso) return { d: days[0], when: "before" };
+  if (t > days[days.length - 1].iso) return null;
+  return { d: days.find(d => d.iso === t) || days[0], when: "now" };
+}
+function poiList(r) {
+  const tonight = currentDay(r);
+  return Object.entries(POI).filter(([, p]) => !p.v || p.v.includes(r.key)).map(([id, p]) => ({ id, ...p, tonight: tonight && tonight.d.poi === id }));
+}
+const FILTERS = [["alle", "Alle"], ["camp", "Plätze"], ["gas", "Gas"], ["dump", "Entsorgung"], ["ferry", "Fähre"]];
+
+function tabNaehe(r) {
+  const pos = geo.pos || store.get("lastpos", null);
+  const fresh = geo.pos && geo.watch != null;
+  const cur = currentDay(r);
+  const tonightPoi = cur && cur.d.poi ? POI[cur.d.poi] : null;
+  let items = poiList(r).filter(p => geo.filter === "alle" || p.t === geo.filter);
+  if (pos) items = items.map(p => ({ ...p, km: haversine(pos, p) })).sort((a, b) => a.km - b.km);
+  const q = (term) => pos ? `https://www.google.com/maps/search/${encodeURIComponent(term)}/@${pos.lat.toFixed(5)},${pos.lng.toFixed(5)},13z` : `https://www.google.com/maps/search/${encodeURIComponent(term)}`;
+  const navTo = p => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`;
+  const quick = [
+    ["shop", "Supermarkt", "supermarked"],
+    ["gas", "Propan / Gasol", "propan gass"],
+    ["dump", "WC entleeren", "tømmestasjon bobil"],
+    ["wc", "Öffentliches WC", "toalett"],
+    ["fuel", "Tankstelle", "bensinstasjon"],
+    ["camp", "Stellplatz", "bobilparkering"],
+  ];
+  return `<div class="stack">
+    <section class="here">
+      <div class="row" style="justify-content:space-between">
+        <span class="live ${fresh ? "on" : ""}"><i></i>${fresh ? "Standort live" : pos ? "Letzter Standort " + new Date(pos.t).toLocaleString("de-CH", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "Standort aus"}</span>
+        ${geo.watch != null ? `<button class="btn" data-geo="stop">${svg("stop")}Stoppen</button>` : `<button class="btn primary" data-geo="start">${svg("near")}Standort verwenden</button>`}
+      </div>
+      ${geo.err ? `<div class="note">${esc(geo.err)}</div>` : ""}
+      ${cur ? `<div><span class="label">${cur.when === "before" ? "Erste Etappe · " + esc(cur.d.date) : "Heute · " + esc(cur.d.date)}</span><h3 style="margin-top:3px">${esc(cur.d.title)}</h3></div>
+        ${tonightPoi ? `<div class="line" style="display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px">${svg("bed", 'style="width:16px;height:16px;margin-top:3px;color:var(--route)"')}<span>${cur.when === "before" ? "Erste Nacht" : "Heute Nacht"}: <b>${esc(tonightPoi.n)}</b>${pos ? ` · <span class="mono">${fmtKm(haversine(pos, tonightPoi))}</span> Luftlinie` : ""}</span></div>
+        <div class="row"><a class="btn primary" href="${navTo(tonightPoi)}" target="_blank" rel="noopener">${svg("car")}Navigation zum Platz</a>${cur.d.map ? `<a class="btn" href="${cur.d.map}" target="_blank" rel="noopener">${svg("map")}Tagesroute</a>` : ""}</div>` : ""}` : `<p class="muted">Die Reise ist vorbei.</p>`}
+    </section>
+
+    <div><div class="section-title" style="margin-top:4px"><h3>Schnellsuche in der Nähe</h3></div>
+      <div class="maps">${quick.map(([i, l, term]) => `<a class="btn" href="${q(term)}" target="_blank" rel="noopener">${svg(i)}${l}</a>`).join("")}</div>
+      <p class="small muted" style="margin-top:8px">Öffnet Google Maps rund um ${pos ? "deinen Standort" : "die Kartenmitte"} – mit aktuellen Öffnungszeiten.</p>
+    </div>
+
+    <div><div class="section-title" style="margin-top:4px"><h3>Aus deiner Planung</h3><span class="label">${pos ? "nach Distanz" : "ohne Standort"}</span></div>
+      <div class="seg" role="group" aria-label="Filter">${FILTERS.map(([k, l]) => `<button data-filter="${k}" aria-pressed="${geo.filter === k}">${l}</button>`).join("")}</div>
+      <div style="margin-top:6px">${items.slice(0, 25).map(p => `
+        <div class="poi"><span class="ic">${svg(p.t)}</span>
+          <div style="min-width:0"><div class="nm">${esc(p.n)}${p.tonight ? ' <span class="chip">heute Nacht</span>' : ""}</div><div class="ds">${esc(p.d)}</div></div>
+          <div class="km">${p.km != null ? fmtKm(p.km) : ""}<a href="${navTo(p)}" target="_blank" rel="noopener">Navi</a><a href="${p.u}" target="_blank" rel="noopener">Details</a></div>
+        </div>`).join("")}</div>
+      <p class="small muted">Distanzen sind Luftlinie und ca.-Werte; die Detail-Links (park4night, Google Maps) zeigen die genaue Lage.</p>
+    </div>
+  </div>`;
+}
+
+/* ---------- Chat ---------- */
+let sampleFn = undefined;           // undefined = noch unbekannt, null = nicht verfügbar
+const chat = { busy: false, ctl: null };
+(async () => {
+  try { sampleFn = window.claude && typeof window.claude.use === "function" ? await window.claude.use("sample") : null; }
+  catch { sampleFn = null; }
+  if (state.tab === "chat") rerenderTab();
+})();
+
+function routeKnowledge(r) {
+  const days = allDays(r).map(d => `${d.date}${d.n ? " (Tag " + d.n + ")" : ""}: ${d.title}${d.km ? " · " + d.km + ", " + d.h : ""}${d.rest ? " · Ruhetag" : ""}${d.hike ? " · Wandern: " + d.hike : ""} · Übernachtung: ${plain(d.stay)}${d.note ? " · " + d.note : ""}`).join("\n");
+  const places = r.places.map(p => `## ${p.t} (${p.d})\n` + p.items.map(([k, v]) => `- ${k}: ${plain(v)}`).join("\n")).join("\n\n");
+  const hikes = r.hikes.map(h => `- ${h.day}: ${h.n} · Start ${h.start}${h.km ? " · " + h.km + " km" : ""}${h.hm ? " · " + h.hm + " Hm" : ""} · ${h.time} · ${h.lvl}${h.u ? " · " + h.u : ""}`).join("\n");
+  const gas = Object.values(POI).filter(p => p.t === "gas" && (!p.v || p.v.includes(r.key))).map(p => `- ${p.n}: ${p.d}`).join("\n");
+  const others = Object.values(ROUTES).filter(o => o.key !== r.key).map(o => `- Variante ${o.key} (${o.name}): ${o.title}. Nächte: ${o.nights.map(n => n[0] + " " + n[1]).join(", ")}. Schwerpunkt: ${o.tagline}. Risiko: ${o.risk}.`).join("\n");
+  const kv = arr => arr.map(([k, v]) => `- ${k}: ${plain(v)}`).join("\n");
+  return `# Variante ${r.key}: ${r.name} – ${r.title}
+Schwerpunkt: ${r.tagline}. Fahr-/Ruhetage: ${r.drive}. Angeln: ${r.angeln}. Hauptrisiko: ${r.risk}.
+${r.intro}
+
+## Tagesplan (inkl. gemeinsamer An- und Rückreise ab/bis Oberdiessbach BE)
+${days}
+
+${places}
+
+## Wanderungen
+${hikes}
+
+## Gas
+${INFO.gasRules[r.key]}
+${gas}
+${INFO.gasNotes.map(plain).join("\n")}
+
+## Pässe
+${INFO.passes.filter(p => p[4].includes(r.key)).map(p => `- ${p[0]} (${p[1]}): ${p[2]} → ${p[3]}`).join("\n")}
+
+## Motorhome über 3,5 t
+${kv(INFO.vehicle)}
+
+## Nordlicht
+${r.aurora}
+${kv(INFO.aurora)}
+Kamera Sony A7C:
+${kv(INFO.camera)}
+
+## Angeln
+${kv(INFO.fishing)}
+
+## Tageslicht
+${r.daylight.map(d => `- ${d[0]} ${d[1]}: ${d[2]}–${d[3]}`).join("\n")}
+
+## Solo & Notruf
+${INFO.solo.map(s => "- " + s).join("\n")}
+Notruf 112 Polizei, 113 Ambulanz, 110 Feuerwehr.
+
+## Entscheidungsregel am Mo 26.10. in Oslo
+${DECIDE.map(d => `- ${d.w} → Variante ${d.k}`).join("\n")}
+
+## Die anderen Varianten (zum Vergleich)
+${others}`;
+}
+
+function contextNow(r) {
+  const now = today();
+  const pos = geo.pos || store.get("lastpos", null);
+  let s = `Heute ist ${now.toLocaleDateString("de-CH", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ${now.toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}.`;
+  if (pos) {
+    const near = poiList(r).map(p => ({ ...p, km: haversine(pos, p) })).sort((a, b) => a.km - b.km).slice(0, 4);
+    s += ` Aktueller Standort des Reisenden: ${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)} (±${Math.round(pos.acc || 0)} m, Stand ${new Date(pos.t).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" })}). Nächste Orte aus der Planung (Luftlinie): ${near.map(p => p.n + " " + fmtKm(p.km)).join(", ")}.`;
+  }
+  return s;
+}
+
+function systemPrompt(r) {
+  return `Du bist der persönliche Reiseberater für eine Solo-Reise im Motorhome (über 3,5 t, unter 7,5 t) durch Südnorwegen bzw. nach Härjedalen, Ende Oktober / Anfang November 2026. Der Reisende hat Variante ${r.key} geöffnet und will dazu beraten werden.
+
+So antwortest du:
+- Auf Deutsch, Schweizer Schreibweise (ss statt ß), per Du.
+- Kurz und praktisch, gut lesbar auf dem Handy: wenige Sätze oder eine kurze Liste. Keine Tabellen, keine Überschriften.
+- Stütze dich zuerst auf die Reiseplanung unten. Wenn etwas dort nicht steht, sag das und kennzeichne allgemeines Wissen als solches.
+- Du hast kein Internet: Aktuelles Wetter, Strassenstatus oder Öffnungszeiten kennst du nicht. Verweise dann auf yr.no, vegvesen.no/trafikk (Tel. 175), varsom.no oder den Platz selbst.
+- Sicherheit geht vor: Er ist allein unterwegs, die Tage sind kurz, ab ca. 800 m ist Schnee möglich.
+- Wenn der Standort angegeben ist, beziehe ihn ein (z. B. was als Nächstes kommt, wo er tanken, Gas tauschen oder entsorgen kann).
+
+${contextNow(r)}
+
+=== REISEPLANUNG ===
+${routeKnowledge(r)}`;
+}
+
+function md(text) {
+  const lines = esc(text).split(/\n/);
+  let out = "", list = false;
+  const inline = s => s
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  for (const ln of lines) {
+    const m = ln.match(/^\s*(?:[-*•]|\d+\.)\s+(.*)/);
+    if (m) { if (!list) { out += "<ul>"; list = true; } out += "<li>" + inline(m[1]) + "</li>"; continue; }
+    if (list) { out += "</ul>"; list = false; }
+    const t = ln.replace(/^#+\s*/, "").trim();
+    if (t) out += "<p>" + inline(t) + "</p>";
+  }
+  if (list) out += "</ul>";
+  return out;
+}
+
+const chatKey = r => "chat:" + r.key;
+function chatMode() {
+  if (sampleFn) return "claude";
+  if (store.get("apikey", "")) return "api";
+  return sampleFn === undefined ? "pending" : "none";
+}
+
+function tabChat(r) {
+  const msgs = store.get(chatKey(r), []);
+  const mode = chatMode();
+  const setup = mode === "none" ? `
+    <div class="keybox">
+      <b>Chat einrichten</b>
+      <p class="small">In der Claude-Ansicht läuft der Berater über dein Claude-Konto. Hier (eigene Web-Adresse) braucht er einen Anthropic API-Schlüssel. Er wird nur in diesem Browser gespeichert und direkt an api.anthropic.com gesendet.</p>
+      <form id="keyform" class="row"><input id="apikey" type="password" autocomplete="off" placeholder="sk-ant-…" aria-label="API-Schlüssel"><button class="btn primary" type="submit">Speichern</button></form>
+      <p class="small muted">Schlüssel erstellen: ${L("console.anthropic.com", "https://console.anthropic.com/settings/keys")}</p>
+    </div>` : mode === "pending" ? `<p class="muted small">Verbinde mit Claude …</p>` : "";
+  return `<div class="chat">
+    <div class="row" style="justify-content:space-between"><div><span class="label">Berater · Variante ${r.key}</span><h2 style="margin-top:2px">Frag zur Route</h2></div>
+      ${msgs.length ? `<button class="btn" data-chat="clear">Neu beginnen</button>` : ""}</div>
+    ${setup}
+    <div class="msgs" id="msgs">
+      ${msgs.length ? "" : `<div class="msg bot"><p>Hallo! Ich kenne deinen ganzen Plan für Variante ${r.key} – Etappen, Plätze, Touren, Gas, Pässe und Nordlicht. ${geo.pos || store.get("lastpos", null) ? "Deinen letzten Standort beziehe ich mit ein." : "Wenn du unter «Nähe» den Standort einschaltest, beziehe ich ihn mit ein."}</p></div>`}
+      ${msgs.map(m => `<div class="msg ${m.role === "user" ? "user" : "bot"}">${m.role === "user" ? esc(m.content).replace(/\n/g, "<br>") : md(m.content)}</div>`).join("")}
+    </div>
+    ${msgs.length ? "" : `<div class="suggest">${r.suggestions.map(s => `<button data-suggest="${esc(s)}">${esc(s)}</button>`).join("")}</div>`}
+    ${mode === "api" ? `<p class="small muted">Läuft über deinen API-Schlüssel · <button class="btn" style="padding:3px 8px;font-size:.78rem" data-chat="forget">Schlüssel entfernen</button></p>` : ""}
+  </div>`;
+}
+
+function composerHTML() {
+  return `<div class="composer"><div class="wrap"><form id="chatform">
+    <textarea id="chatinput" rows="1" placeholder="Frage zur Route …" aria-label="Nachricht"></textarea>
+    <button type="submit" id="sendbtn" aria-label="Senden">${svg("send")}</button>
+  </form></div></div>`;
+}
+
+async function askApi(system, turns, onText, signal) {
+  const key = store.get("apikey", "");
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST", signal,
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "anthropic-beta": "server-side-fallback-2026-07-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({ model: "claude-opus-5-5", max_tokens: 16000, stream: true, system, messages: turns, output_config: { effort: "medium" }, fallbacks: "default" }),
+  });
+  if (!res.ok) {
+    let msg = "Fehler " + res.status;
+    try { const j = await res.json(); msg += ": " + (j.error && j.error.message || ""); } catch {}
+    if (res.status === 401) msg = "Der API-Schlüssel wurde abgelehnt. Bitte prüfen oder neu eingeben.";
+    if (res.status === 429) msg = "Zu viele Anfragen – kurz warten und nochmals senden.";
+    throw new Error(msg);
+  }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "", text = "", stop = null;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n\n")) >= 0) {
+      const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+      const data = chunk.split("\n").filter(l => l.startsWith("data:")).map(l => l.slice(5).trim()).join("");
+      if (!data) continue;
+      let ev; try { ev = JSON.parse(data); } catch { continue; }
+      if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") { text += ev.delta.text; onText(text); }
+      else if (ev.type === "message_delta" && ev.delta && ev.delta.stop_reason) stop = ev.delta.stop_reason;
+      else if (ev.type === "error") throw new Error((ev.error && ev.error.message) || "Unbekannter Fehler");
+    }
+  }
+  if (stop === "refusal" && !text) throw new Error("Diese Frage wurde nicht beantwortet. Bitte anders formulieren.");
+  return text;
+}
+
+async function sendChat(text) {
+  const r = ROUTES[state.route];
+  text = text.trim();
+  if (!text || chat.busy) return;
+  const mode = chatMode();
+  if (mode === "none" || mode === "pending") return;
+  const msgs = store.get(chatKey(r), []);
+  msgs.push({ role: "user", content: text });
+  store.set(chatKey(r), msgs);
+  rerenderTab();
+  const box = $("#msgs");
+  const bubble = document.createElement("div");
+  bubble.className = "msg bot"; bubble.innerHTML = '<p class="typing">Denkt nach …</p>';
+  box.appendChild(bubble);
+  bubble.scrollIntoView({ block: "end", behavior: "smooth" });
+  chat.busy = true; chat.ctl = new AbortController(); setSendState();
+  let turns = msgs.slice(-20);
+  while (turns.length && turns[0].role !== "user") turns = turns.slice(1);
+  const onText = t => { bubble.innerHTML = md(t); };
+  try {
+    let answer;
+    if (mode === "claude") {
+      const input = [{ role: "user", content: systemPrompt(r) + "\n\n=== FRAGE ===\n" + turns[0].content }, ...turns.slice(1)];
+      const res = await sampleFn(input, { cache: false, signal: chat.ctl.signal, onText: ({ text }) => onText(text) });
+      answer = res.text;
+    } else {
+      answer = await askApi(systemPrompt(r), turns, onText, chat.ctl.signal);
+    }
+    msgs.push({ role: "assistant", content: answer || "(keine Antwort)" });
+    store.set(chatKey(r), msgs);
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "cancelled" || (e && e.name === "AbortError")) { bubble.remove(); }
+    else {
+      const copy = code === "not_granted" ? "Der Chat wurde in dieser Ansicht nicht erlaubt. Lade die Seite neu, um nochmals gefragt zu werden."
+        : code === "rate_limited" ? "Gerade zu viele Anfragen – in einer Minute nochmals versuchen."
+        : (e && e.message) || "Die Antwort ist fehlgeschlagen. Bitte nochmals senden.";
+      bubble.className = "msg err"; bubble.textContent = copy;
+      msgs.pop(); store.set(chatKey(r), msgs);
+    }
+  } finally {
+    chat.busy = false; chat.ctl = null; setSendState();
+    if (!$(".msg.err")) rerenderTab();
+  }
+}
+function setSendState() {
+  const b = $("#sendbtn"); if (!b) return;
+  b.innerHTML = chat.busy ? svg("stop") : svg("send");
+  b.setAttribute("aria-label", chat.busy ? "Stoppen" : "Senden");
+}
+
+/* ---------- Rendering ---------- */
+function renderDetail() {
+  const r = ROUTES[state.route];
+  document.documentElement.style.setProperty("--route", r.color);
+  document.body.classList.toggle("chat-open", state.tab === "chat");
+  const showComposer = state.tab === "chat";
+  return `
+  <div class="dhead"><div class="wrap">
+    <button class="back" data-go="" aria-label="Zur Routenwahl">${svg("back")}</button>
+    <span class="badge">${r.key}</span>
+    <div class="t"><b>${esc(r.name)}</b><span>${esc(r.title)}</span></div>
+  </div></div>
+  <main class="detail wrap" id="tabbody">${tabBody(r)}</main>
+  ${showComposer ? composerHTML() : ""}
+  <nav class="tabbar" aria-label="Bereiche"><div class="in">
+    ${TABS.map(t => `<button class="tab" data-tab="${t.id}" ${state.tab === t.id ? 'aria-current="page"' : ""}>${svg(t.icon)}${t.label}</button>`).join("")}
+  </div></nav>`;
+}
+function tabBody(r) {
+  switch (state.tab) {
+    case "orte": return tabOrte(r);
+    case "touren": return tabTouren(r);
+    case "naehe": return tabNaehe(r);
+    case "infos": return tabInfos(r);
+    case "chat": return tabChat(r);
+    default: return tabPlan(r);
+  }
+}
+function rerenderTab() {
+  const el = $("#tabbody");
+  if (!el || !state.route) return;
+  const opens = [...el.querySelectorAll("details.fold")].map(d => d.open);
+  el.innerHTML = tabBody(ROUTES[state.route]);
+  if (opens.length) el.querySelectorAll("details.fold").forEach((d, i) => { if (i < opens.length) d.open = opens[i]; });
+}
+function render() {
+  const app = $("#app");
+  app.innerHTML = state.route ? renderDetail() : renderStart();
+  if (state.route) store.set("chosen", state.route);
+  if (state.tab === "chat") { const m = $("#msgs"); if (m && m.lastElementChild) m.lastElementChild.scrollIntoView({ block: "end" }); }
+}
+
+/* ---------- Events ---------- */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-go],[data-tab],[data-suggest],[data-chat],[data-geo],[data-filter]");
+  if (!t) return;
+  if (t.hasAttribute("data-go")) { go(t.dataset.go || null); return; }
+  if (t.dataset.tab) { go(state.route, t.dataset.tab); return; }
+  if (t.dataset.suggest) { sendChat(t.dataset.suggest); return; }
+  if (t.dataset.chat === "clear") { if (chat.ctl) chat.ctl.abort(); store.set(chatKey(ROUTES[state.route]), []); rerenderTab(); return; }
+  if (t.dataset.chat === "forget") { store.set("apikey", ""); rerenderTab(); return; }
+  if (t.dataset.geo === "start") { startGeo(); return; }
+  if (t.dataset.geo === "stop") { stopGeo(); rerenderTab(); return; }
+  if (t.dataset.filter) { geo.filter = t.dataset.filter; rerenderTab(); return; }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.todo) {
+    const checked = store.get("todos", Object.fromEntries(TODOS.filter(x => x.done).map(x => [x.id, true])));
+    checked[t.dataset.todo] = t.checked;
+    store.set("todos", checked);
+    rerenderTab();
+  }
+});
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  if (e.target.id === "chatform") {
+    if (chat.busy) { chat.ctl && chat.ctl.abort(); return; }
+    const ta = $("#chatinput"); const v = ta.value; ta.value = ""; ta.style.height = "";
+    sendChat(v);
+  }
+  if (e.target.id === "keyform") {
+    const v = $("#apikey").value.trim();
+    if (v) { store.set("apikey", v); rerenderTab(); }
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "chatinput") { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 140) + "px"; }
+});
+document.addEventListener("keydown", e => {
+  if (e.target.id === "chatinput" && e.key === "Enter" && !e.shiftKey && window.matchMedia("(hover: hover)").matches) {
+    e.preventDefault(); $("#chatform").requestSubmit();
+  }
+});
+
+readHash();
+render();
+if (store.get("geoOn", false) && geoAvailable()) startGeo();
+</script>
+</body>
+</html>
